@@ -2,14 +2,14 @@ import React from 'react'
 
 const placeholderViews = {
   embarazo: {
-    icon: '🤰',
+    icon: <img src='/embarazo_2.png' alt='logo_embarazo'></img>,
     title: 'Mi Embarazo',
     description: 'Aquí verás el desarrollo semana a semana de tu bebé, cambios en tu cuerpo y consejos personalizados.',
     color: 'from-pink-400 to-rose-500',
     items: ['Desarrollo del bebé por semana', 'Cambios físicos esperados', 'Tips de bienestar', 'Videos educativos'],
   },
   controles: {
-    icon: '📅',
+    icon: <img src='/calendario_embarazo.png' alt='logo_calendario'></img>,
     title: 'Controles y Citas',
     description: 'Gestiona todas tus citas prenatales, agenda nuevas y recibe recordatorios automáticos.',
     color: 'from-blue-400 to-indigo-500',
