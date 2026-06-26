@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@layer base {
+  * {
+    font-family: 'Inter', sans-serif;
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #f9f5ff;
+  }
+
+  :root {
+    --pink-primary: #e91e8c;
+    --pink-light: #fce4ec;
+    --pink-soft: #fff0f7;
+    --purple-primary: #7c3aed;
+    --purple-light: #ede9fe;
+    --sidebar-width: 220px;
+  }
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #e4a8c8;
+  border-radius: 3px;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.35s ease-out both;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out both;
+}
+
+/* Progress bar gradient */
+.progress-pregnancy {
+  background: linear-gradient(90deg, #f472b6, #e91e8c);
+  border-radius: 999px;
+  height: 8px;
+  transition: width 0.8s ease;
+}
+
+/* Chart line */
+.chart-area {
+  background: linear-gradient(180deg, rgba(233,30,140,0.12) 0%, rgba(233,30,140,0) 100%);
+}
