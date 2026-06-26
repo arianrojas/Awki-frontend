@@ -1,15 +1,15 @@
 import React from 'react'
 
 const navItems = [
-  { id: 'inicio',       icon: '🏠', label: 'Inicio' },
-  { id: 'embarazo',     icon: '🤰', label: 'Mi Embarazo' },
-  { id: 'controles',    icon: '📅', label: 'Controles y Citas' },
-  { id: 'historial',    icon: '📋', label: 'Historial Médico' },
-  { id: 'sintomas',     icon: '💊', label: 'Síntomas' },
-  { id: 'ecografias',   icon: '🔬', label: 'Ecografías y Exámenes' },
-  { id: 'educacion',    icon: '📖', label: 'Educación' },
-  { id: 'recordatorios',icon: '🔔', label: 'Recordatorios' },
-  { id: 'mensajes',     icon: '💬', label: 'Mensajes' },
+  { id: 'inicio', icon: <img src="/inicio.png" alt="logo_inicio" className='w-full h-full object-cover'></img>, label: 'Inicio' },
+  { id: 'embarazo', icon: <img src="/embarazo.png" alt="logo_embarazo" className='w-full h-full object-cover'></img>, label: 'Mi Embarazo' },
+  { id: 'controles', icon: <img src="/calendario.png" alt="logo_calendario" className='w-full h-full object-cover'></img>, label: 'Controles y Citas' },
+  { id: 'historial', icon: <img src="/historial.png" alt="logo_historial" className='w-full h-full object-cover'></img>, label: 'Historial Médico' },
+  { id: 'sintomas', icon: <img src="/capsula.png" alt="logo_sintomas" className='w-full h-full object-cover'></img>, label: 'Síntomas' },
+  { id: 'ecografias', icon: <img src="/microscopio.png" alt="logo_microscopio" className='w-full h-full object-cover'></img>, label: 'Ecografías y Exámenes' },
+  { id: 'educacion', icon: <img src="/educacion.png" alt="logo_educacion" className='w-full h-full object-cover'></img>, label: 'Educación' },
+  { id: 'recordatorios', icon: <img src="/notificacion.png" alt="logo_notificacion" className='w-full h-full object-cover'></img>, label: 'Recordatorios' },
+  { id: 'mensajes', icon: <img src="/mensaje.png" alt="logo_mensaje" className='w-full h-full object-cover'></img>, label: 'Mensajes' },
 ]
 
 export default function Sidebar({ activeTab, setActiveTab }) {
@@ -17,12 +17,16 @@ export default function Sidebar({ activeTab, setActiveTab }) {
     <aside className="fixed top-0 left-0 h-screen w-[220px] bg-white border-r border-pink-100 flex flex-col z-30 shadow-sm">
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-5 border-b border-pink-50">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center text-white text-lg font-bold shadow-md">
-          🤱
+        <div className="w-10 h-10 rounded-full overflow-hidden shadow-md shadow-pink-300/50">
+          <img
+            src="/logo_awki.png"
+            alt="Logo Awki"
+            className="w-full h-full object-cover"
+          />
         </div>
         <div>
-          <p className="text-pink-600 font-bold text-[15px] leading-tight">Mamá Segura</p>
-          <p className="text-gray-400 text-[11px]">Cuidado para ti y tu bebé</p>
+          <p className="text-pink-600 font-extrabold text-[25px] leading-tight" style={{ fontFamily: '"Times New Roman", Times, serif' }}>Awki</p>
+          <p className="text-gray-400 text-[12px]" style={{ fontFamily: '"Arial", Times, serif' }}>Cuidando cada nueva vida</p>
         </div>
       </div>
 
@@ -51,7 +55,13 @@ export default function Sidebar({ activeTab, setActiveTab }) {
       {/* Motivational Banner */}
       <div className="mx-3 mb-4 rounded-2xl bg-gradient-to-br from-pink-50 to-purple-50 border border-pink-100 p-4">
         <div className="flex items-start gap-2">
-          <span className="text-2xl">👶</span>
+          <span className="w-6 h-6 flex-shrink-0">
+            <img
+              src="/logo_bebe.png"
+              alt="bebeAwki"
+              className="w-full h-full object-cover"
+            />
+          </span>
           <p className="text-[11px] text-gray-500 leading-relaxed">
             Cada pequeño paso te acerca a conocer a tu bebé. <span className="text-pink-500">❤️</span>
           </p>
