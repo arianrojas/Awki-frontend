@@ -59,7 +59,7 @@ const placeholderViews = {
   },
 }
 
-export default function PlaceholderView({ tab }) {
+export default function VistaPendiente({ tab }) {
   const info = placeholderViews[tab]
   if (!info) return null
 

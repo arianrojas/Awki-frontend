@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function Header({ activeTab }) {
+export default function Encabezado({ activeTab }) {
   const greetings = {
     inicio: { title: '¡Hola, María Fernanda!', subtitle: 'Estás en tu viaje más importante. Estamos contigo.', image: '/ola.png' },
     embarazo: { title: 'Mi Embarazo', subtitle: 'Sigue el progreso de tu bebé semana a semana.', image: '/embarazo.png' },

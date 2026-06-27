@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { createPortal } from 'react-dom'
 
-export default function QuickActions() {
+export default function AccionesRapidas() {
   const [modalAbierto, setModalAbierto] = useState(null)
 
   return (

@@ -329,7 +329,7 @@ function ArticleModal({ article, onClose }) {
   )
 }
 
-export default function ArticlesSection() {
+export default function SeccionArticulos() {
   const [selectedArticle, setSelectedArticle] = useState(null)
 
   return (

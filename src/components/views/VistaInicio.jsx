@@ -1,6 +1,6 @@
 import React from 'react'
-import QuickActions from './QuickActions'
-import ArticlesSection from './ArticlesSection'
+import AccionesRapidas from './AccionesRapidas'
+import SeccionArticulos from './SeccionArticulos'
 
 // ─── Mini chart data ───────────────────────────────────────────────────────────
 const weeks = ['Sem. 4', 'Sem. 8', 'Sem. 12', 'Sem. 16', 'Sem. 20', 'Sem. 22']
@@ -44,7 +44,7 @@ function MiniLineChart() {
 }
 
 // ─── Main View ─────────────────────────────────────────────────────────────────
-export default function InicioView() {
+export default function VistaInicio() {
   return (
     <>
       <div className="animate-fade-in">
@@ -86,7 +86,7 @@ export default function InicioView() {
             </div>
 
             {/* Quick Actions */}
-            <QuickActions />
+            <AccionesRapidas />
 
             {/* Health Summary + Chart */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -121,7 +121,7 @@ export default function InicioView() {
             </div>
 
             {/* ── Articles Section ── */}
-            <ArticlesSection />
+            <SeccionArticulos />
           </div>
 
           {/* ── RIGHT COLUMN ── */}

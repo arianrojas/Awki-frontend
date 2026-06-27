@@ -10,9 +10,10 @@ const navItems = [
   { id: 'educacion', icon: <img src="/educacion.png" alt="logo_educacion" className='w-full h-full object-cover'></img>, label: 'Educación' },
   { id: 'recordatorios', icon: <img src="/notificacion.png" alt="logo_notificacion" className='w-full h-full object-cover'></img>, label: 'Recordatorios' },
   { id: 'mensajes', icon: <img src="/mensaje.png" alt="logo_mensaje" className='w-full h-full object-cover'></img>, label: 'Mensajes' },
+  { id: 'doctor', icon: <span className="text-lg leading-none">👨‍⚕️</span>, label: 'Panel Médico (Demo)' },
 ]
 
-export default function Sidebar({ activeTab, setActiveTab }) {
+export default function BarraLateral({ activeTab, setActiveTab }) {
   return (
     <aside className="fixed top-0 left-0 h-screen w-[220px] bg-white border-r border-pink-100 flex flex-col z-30 shadow-sm">
       {/* Logo */}
@@ -52,32 +53,21 @@ export default function Sidebar({ activeTab, setActiveTab }) {
         ))}
       </nav>
 
-      {/* Motivational Banner */}
-      <div className="mx-3 mb-4 rounded-2xl bg-gradient-to-br from-pink-50 to-purple-50 border border-pink-100 p-4">
-        <div className="flex items-start gap-2">
-          <span className="w-6 h-6 flex-shrink-0">
-            <img
-              src="/logo_bebe.png"
-              alt="bebeAwki"
-              className="w-full h-full object-cover"
-            />
-          </span>
-          <p className="text-[11px] text-gray-500 leading-relaxed">
-            Cada pequeño paso te acerca a conocer a tu bebé. <span className="text-pink-500">❤️</span>
-          </p>
-        </div>
-      </div>
-
       {/* User Profile */}
-      <div className="border-t border-pink-50 px-4 py-4 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-300 to-purple-400 flex items-center justify-center text-white font-bold text-sm">
+      <div
+        onClick={() => setActiveTab('perfil')}
+        className={`border-t border-pink-50 px-4 py-4 flex items-center gap-3 cursor-pointer transition-colors ${activeTab === 'perfil' ? 'bg-pink-50' : 'hover:bg-gray-50'}`}
+      >
+        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-300 to-purple-400 flex items-center justify-center text-white font-bold text-sm shadow-sm">
           MF
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-gray-800 font-semibold text-[13px] truncate">María Fernanda</p>
           <p className="text-gray-400 text-[11px]">24 años</p>
         </div>
-        <button className="text-gray-400 hover:text-pink-500 transition-colors text-xs">›</button>
+        <button className={`text-xs transition-colors ${activeTab === 'perfil' ? 'text-pink-600' : 'text-gray-400 hover:text-pink-500'}`}>
+          ›
+        </button>
       </div>
     </aside>
   )
