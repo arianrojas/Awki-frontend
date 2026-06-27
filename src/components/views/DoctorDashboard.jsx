@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { api } from '../../services/api'
 import { StompClient } from '../../services/WebSocketService'
+import VistaDocumentos from './VistaDocumentos'
 
 // Sirena sintética usando Web Audio API para notificaciones críticas
 function triggerSynthesizedAlarm() {
@@ -43,9 +44,16 @@ export default function DoctorDashboard() {
   // Modales y formularios
   const [showVincularModal, setShowVincularModal] = useState(false)
   const [showControlModal, setShowControlModal] = useState(false)
+  const [showDocsModal, setShowDocsModal] = useState(false)
+  const [docsEmbarazoId, setDocsEmbarazoId] = useState(null)
   const [codigoGenerado, setCodigoGenerado] = useState(null)
   const [codigoIngresado, setCodigoIngresado] = useState('')
   const [pacienteSeleccionada, setPacienteSeleccionada] = useState(null)
+
+  const handleOpenDocsModal = (embId) => {
+    setDocsEmbarazoId(embId)
+    setShowDocsModal(true)
+  }
   
   // Estados de Emergencias y WebSocket
   const [alertas, setAlertas] = useState([])
@@ -580,12 +588,20 @@ export default function DoctorDashboard() {
                       <td className="py-4 text-right">
                         <div className="flex gap-2 justify-end">
                           {p.tieneEmbarazo && (
-                            <button
-                              onClick={() => handleOpenControlModal(p)}
-                              className="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-xl transition-all shadow-sm shadow-blue-100"
-                            >
-                              + Registrar Control
-                            </button>
+                            <>
+                              <button
+                                onClick={() => handleOpenDocsModal(p.embarazo.id)}
+                                className="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl transition-all"
+                              >
+                                📁 Documentos
+                              </button>
+                              <button
+                                onClick={() => handleOpenControlModal(p)}
+                                className="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-xl transition-all shadow-sm shadow-blue-100"
+                              >
+                                + Registrar Control
+                              </button>
+                            </>
                           )}
                           <button
                             onClick={() => handleDesvincular(p.id)}
@@ -840,6 +856,28 @@ export default function DoctorDashboard() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Gestión Documental para el Médico */}
+      {showDocsModal && docsEmbarazoId && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[100] p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-4xl shadow-xl flex flex-col max-h-[90vh]">
+            <div className="flex justify-between items-center mb-4 border-b border-gray-100 pb-3">
+              <h2 className="font-extrabold text-lg text-gray-800 flex items-center gap-2">
+                📁 Expediente Clínico de Gestante
+              </h2>
+              <button
+                onClick={() => setShowDocsModal(false)}
+                className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors font-bold text-lg"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto pr-1">
+              <VistaDocumentos embarazoId={docsEmbarazoId} isDoctor={true} />
+            </div>
           </div>
         </div>
       )}

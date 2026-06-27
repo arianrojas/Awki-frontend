@@ -7,6 +7,7 @@ import FormularioPaciente from './components/views/FormularioPaciente'
 import DoctorDashboard from './components/views/DoctorDashboard'
 import VistaLogin from './components/views/VistaLogin'
 import VistaChat from './components/views/VistaChat'
+import VistaDocumentos from './components/views/VistaDocumentos'
 import BotonSos from './components/BotonSos'
 
 export default function App() {
@@ -95,10 +96,11 @@ export default function App() {
   }
 
   const renderView = () => {
-    if (activeTab === 'inicio')    return <VistaInicio currentUser={currentUser} onPregnancyCreated={handlePregnancyCreated} />
-    if (activeTab === 'mensajes')  return <VistaChat />
-    if (activeTab === 'perfil')    return <FormularioPaciente currentUser={currentUser} onVinculacionComplete={handleReloadEmbarazo} />
-    if (activeTab === 'doctor')    return <DoctorDashboard />
+    if (activeTab === 'inicio')     return <VistaInicio currentUser={currentUser} onPregnancyCreated={handlePregnancyCreated} />
+    if (activeTab === 'mensajes')   return <VistaChat />
+    if (activeTab === 'perfil')     return <FormularioPaciente currentUser={currentUser} onVinculacionComplete={handleReloadEmbarazo} />
+    if (activeTab === 'ecografias') return <VistaDocumentos />
+    if (activeTab === 'doctor')     return <DoctorDashboard />
     return <VistaPendiente tab={activeTab} />
   }
 

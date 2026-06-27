@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { api } from '../../services/api'
+import { indexedDbHelper } from '../../utils/indexedDbHelper'
 
 // ─── Badges ───────────────────────────────────────────────────────────────────
 function Badge({ color, icon, label }) {
@@ -48,6 +49,7 @@ function MensajeBurbuja({ msg }) {
           {msg.alarmaProbable && <Badge color="red"   icon="🔴" label="Posible signo de alerta" />}
           {msg.desdeCache      && <Badge color="gray"  icon="⚡"  label="Caché" />}
           {msg.fallbackUsado   && <Badge color="amber" icon="⚠️"  label="Modo fallback" />}
+          {msg.offline         && <Badge color="gray"  icon="⏳"  label="Pendiente de envío (Offline)" />}
           {hora && <span className="text-[10px] text-gray-400">{hora}</span>}
         </div>
       </div>
@@ -114,6 +116,7 @@ function Sugerencias({ onSelect }) {
 }
 
 // ─── Main VistaChat ───────────────────────────────────────────────────────────
+// ─── Main VistaChat ───────────────────────────────────────────────────────────
 export default function VistaChat() {
   const [mensajes,  setMensajes]  = useState([])
   const [input,     setInput]     = useState('')
@@ -131,21 +134,96 @@ export default function VistaChat() {
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 80)
   }, [])
 
-  // ── Load history ──
+  // ── Load history and offline messages ──
   useEffect(() => {
     if (!embarazoId) { setCargando(false); return }
 
-    api.get('/api/v1/chat/historial', { embarazoId, page: 0, size: 30 })
-      .then(data => {
-        // Backend returns a Spring Page object: { content: [...], totalPages, ... }
+    const cargarHistorialYOffline = async () => {
+      try {
+        // Cargar historial del servidor
+        const data = await api.get('/api/v1/chat/historial', { embarazoId, page: 0, size: 30 })
         const content = Array.isArray(data) ? data : (data?.content ?? [])
-        // Content comes newest-first from the backend (sorted DESC) → reverse to show oldest first
-        setMensajes([...content].reverse())
+        const serverMsgs = [...content].reverse()
+
+        // Cargar mensajes offline locales de IndexedDB
+        const offlineMsgs = await indexedDbHelper.obtenerMensajesOffline()
+        const offlineMsgsMapped = offlineMsgs
+          .filter(m => m.embarazoId === embarazoId)
+          .map(m => ({
+            id: m.id,
+            rol: 'PACIENTE',
+            contenido: m.contenido,
+            alarmaProbable: false,
+            desdeCache: false,
+            fallbackUsado: false,
+            offline: true,
+            createdAt: m.offlineTimestamp
+          }))
+
+        setMensajes([...serverMsgs, ...offlineMsgsMapped])
         scrollToBottom()
-      })
-      .catch(err => setError(err.message))
-      .finally(() => setCargando(false))
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setCargando(false)
+      }
+    }
+
+    cargarHistorialYOffline()
   }, [embarazoId, scrollToBottom])
+
+  // ── Sync offline messages when back online ──
+  const sincronizarOffline = useCallback(async () => {
+    if (!embarazoId || !navigator.onLine) return
+
+    try {
+      const offlineMsgs = await indexedDbHelper.obtenerMensajesOffline()
+      const msgsDeEsteEmbarazo = offlineMsgs.filter(m => m.embarazoId === embarazoId)
+      if (msgsDeEsteEmbarazo.length === 0) return
+
+      setError(null)
+      setLoading(true)
+
+      const items = msgsDeEsteEmbarazo.map(m => ({
+        embarazoId: m.embarazoId,
+        contenido: m.contenido,
+        offlineTimestamp: m.offlineTimestamp
+      }))
+
+      const resp = await api.post('/api/v1/sync/offline-batch', {
+        deviceId: 'web-client-' + (user?.id ?? 'desconocido'),
+        items
+      })
+
+      // Limpiar IndexedDB para los mensajes sincronizados
+      for (const m of msgsDeEsteEmbarazo) {
+        await indexedDbHelper.eliminarMensajeOffline(m.id)
+      }
+
+      // Volver a consultar el historial completo
+      const data = await api.get('/api/v1/chat/historial', { embarazoId, page: 0, size: 30 })
+      const content = Array.isArray(data) ? data : (data?.content ?? [])
+      setMensajes([...content].reverse())
+      scrollToBottom()
+
+      console.log(`[Sync] Sincronización offline exitosa. Procesados: ${resp?.procesados}`)
+    } catch (err) {
+      console.error("Error sincronizando mensajes offline:", err)
+      setError("No se pudieron sincronizar los mensajes offline pendientes: " + err.message)
+    } finally {
+      setLoading(false)
+    }
+  }, [embarazoId, user?.id, scrollToBottom])
+
+  // Escuchar el cambio a modo online
+  useEffect(() => {
+    window.addEventListener('online', sincronizarOffline)
+    sincronizarOffline() // Intentar de inmediato al montar
+
+    return () => {
+      window.removeEventListener('online', sincronizarOffline)
+    }
+  }, [sincronizarOffline])
 
   // ── Send message ──
   const enviarMensaje = async (texto) => {
@@ -155,25 +233,43 @@ export default function VistaChat() {
     setInput('')
     setError(null)
 
-    // Optimistic update: show patient message immediately
+    const tempId = `temp-${Date.now()}`
+    const nowIso = new Date().toISOString()
     const tempMsg = {
-      id: `temp-${Date.now()}`,
+      id: tempId,
       rol: 'PACIENTE',
       contenido,
       alarmaProbable: false,
       desdeCache: false,
       fallbackUsado: false,
-      createdAt: new Date().toISOString(),
+      createdAt: nowIso,
     }
+
+    // Si estamos sin conexión de red detectada por el navegador
+    if (!navigator.onLine) {
+      const offlineMsg = {
+        id: tempId,
+        embarazoId,
+        contenido,
+        offlineTimestamp: nowIso
+      }
+      try {
+        await indexedDbHelper.guardarMensajeOffline(offlineMsg)
+        setMensajes(prev => [...prev, { ...tempMsg, offline: true }])
+        scrollToBottom()
+      } catch (e) {
+        setError("Error guardando mensaje localmente: " + e.message)
+      }
+      return
+    }
+
+    // Intentar envío normal
     setMensajes(prev => [...prev, tempMsg])
     setLoading(true)
     scrollToBottom()
 
     try {
-      // POST /api/v1/chat/mensaje → ChatMensajeResponse
       const resp = await api.post('/api/v1/chat/mensaje', { embarazoId, contenido })
-
-      // Add IA response
       const iaMsg = {
         id: resp.mensajeIaId,
         rol: 'IA',
@@ -186,9 +282,20 @@ export default function VistaChat() {
       setMensajes(prev => [...prev, iaMsg])
       scrollToBottom()
     } catch (err) {
-      setError(err.message)
-      // Remove the optimistic message on failure
-      setMensajes(prev => prev.filter(m => m.id !== tempMsg.id))
+      console.warn("Fallo de red al enviar mensaje, guardando localmente:", err)
+      const offlineMsg = {
+        id: tempId,
+        embarazoId,
+        contenido,
+        offlineTimestamp: nowIso
+      }
+      try {
+        await indexedDbHelper.guardarMensajeOffline(offlineMsg)
+        setMensajes(prev => prev.map(m => m.id === tempId ? { ...m, offline: true } : m))
+      } catch (e) {
+        setError(err.message)
+        setMensajes(prev => prev.filter(m => m.id !== tempId))
+      }
     } finally {
       setLoading(false)
     }
