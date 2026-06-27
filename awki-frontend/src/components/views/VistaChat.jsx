@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { api } from '../../services/api'
 import { indexedDbHelper } from '../../utils/indexedDbHelper'
 import { aiAssistantService } from '../../services/aiAssistantService'
+import { Heart, Zap, AlertTriangle, Hourglass, User, MessageCircle, X } from 'lucide-react'
 
 // ─── Badges ───────────────────────────────────────────────────────────────────
 function Badge({ color, icon, label }) {
@@ -31,7 +32,7 @@ function MensajeBurbuja({ msg }) {
       {/* Avatar IA */}
       {!esPaciente && (
         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-sm mt-1">
-          <span className="text-sm">🤰</span>
+          <Heart className="w-4 h-4 text-white" />
         </div>
       )}
 
@@ -55,10 +56,10 @@ function MensajeBurbuja({ msg }) {
 
         {/* Badges + timestamp */}
         <div className={`flex items-center gap-1.5 flex-wrap ${esPaciente ? 'justify-end' : 'justify-start'}`}>
-          {msg.alarmaProbable && <Badge color="red"   icon="🔴" label="Posible signo de alerta" />}
-          {msg.desdeCache      && <Badge color="gray"  icon="⚡"  label="Caché" />}
-          {msg.fallbackUsado   && <Badge color="amber" icon="⚠️"  label="Modo fallback" />}
-          {msg.offline         && <Badge color="gray"  icon="⏳"  label="Pendiente de envío (Offline)" />}
+          {msg.alarmaProbable && <Badge color="red"   icon={<span className="w-2 h-2 bg-red-500 rounded-full inline-block" />} label="Posible signo de alerta" />}
+          {msg.desdeCache      && <Badge color="gray"  icon={<Zap className="w-3 h-3" />}           label="Caché" />}
+          {msg.fallbackUsado   && <Badge color="amber" icon={<AlertTriangle className="w-3 h-3" />} label="Modo fallback" />}
+          {msg.offline         && <Badge color="gray"  icon={<Hourglass className="w-3 h-3" />}     label="Pendiente de envío (Offline)" />}
           {hora && <span className="text-[10px] text-gray-400">{hora}</span>}
         </div>
       </div>
@@ -66,7 +67,7 @@ function MensajeBurbuja({ msg }) {
       {/* Avatar Paciente */}
       {esPaciente && (
         <div className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center flex-shrink-0 mt-1 border border-pink-200">
-          <span className="text-sm">👤</span>
+          <User className="w-4 h-4 text-pink-400" />
         </div>
       )}
     </div>
@@ -78,7 +79,7 @@ function TypingIndicator() {
   return (
     <div className="flex justify-start gap-2">
       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-sm">
-        <span className="text-sm">🤰</span>
+        <Heart className="w-4 h-4 text-white" />
       </div>
       <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
         <div className="flex items-center gap-1">
@@ -102,8 +103,8 @@ const SUGERENCIAS = [
 function Sugerencias({ onSelect }) {
   return (
     <div className="flex flex-col items-center gap-4 py-8 px-4">
-      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center text-3xl">
-        💬
+      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center">
+        <MessageCircle className="w-8 h-8 text-pink-400" />
       </div>
       <div className="text-center">
         <p className="font-semibold text-gray-700 mb-1">¡Hola! Soy tu asistente IA prenatal</p>
@@ -323,8 +324,8 @@ export default function VistaChat() {
   if (!embarazoId && !cargando) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4 p-8 text-center">
-        <div className="w-20 h-20 rounded-3xl bg-amber-50 border border-amber-200 flex items-center justify-center text-4xl">
-          🤰
+        <div className="w-20 h-20 rounded-3xl bg-amber-50 border border-amber-200 flex items-center justify-center">
+          <Heart className="w-10 h-10 text-amber-400" />
         </div>
         <div>
           <p className="font-bold text-gray-800 text-lg mb-2">Primero registra tu embarazo</p>
@@ -343,7 +344,7 @@ export default function VistaChat() {
       {/* ── Header ── */}
       <div className="bg-white border-b border-gray-100 px-5 py-3 flex items-center gap-3 flex-shrink-0">
         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-pink-400 to-purple-600 flex items-center justify-center shadow-sm">
-          <span className="text-lg">🤰</span>
+          <Heart className="w-5 h-5 text-white" />
         </div>
         <div>
           <p className="font-bold text-gray-800 text-sm">Asistente Prenatal IA</p>
@@ -383,8 +384,8 @@ export default function VistaChat() {
         {error && (
           <div className="flex justify-center">
             <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-2.5 flex items-center gap-2 text-sm text-red-600 max-w-sm">
-              <span>⚠</span> {error}
-              <button onClick={() => setError(null)} className="ml-1 text-red-400 hover:text-red-600">✕</button>
+              <AlertTriangle className="w-4 h-4 flex-shrink-0" /> {error}
+              <button onClick={() => setError(null)} className="ml-1 text-red-400 hover:text-red-600"><X className="w-3 h-3" /></button>
             </div>
           </div>
         )}

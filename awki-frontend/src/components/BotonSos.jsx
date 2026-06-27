@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { api } from '../services/api'
+import { Check, AlertTriangle, MessageSquare, Phone } from 'lucide-react'
 
 export default function BotonSos({ currentUser }) {
   const [showModal, setShowModal] = useState(false)
@@ -188,8 +189,8 @@ export default function BotonSos({ currentUser }) {
 
             {estado === 'success' && (
               <>
-                <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-4xl z-10">
-                  ✓
+                <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center text-green-600 z-10">
+                  <Check className="w-10 h-10" />
                 </div>
                 <div className="z-10">
                   <h3 className="text-xl font-bold text-gray-800">¡Alerta Recibida!</h3>
@@ -200,8 +201,8 @@ export default function BotonSos({ currentUser }) {
 
             {estado === 'offline_fallback' && (
               <>
-                <div className="w-20 h-20 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 text-4xl z-10 animate-bounce">
-                  ⚠
+                <div className="w-20 h-20 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 z-10 animate-bounce">
+                  <AlertTriangle className="w-10 h-10" />
                 </div>
                 <div className="z-10">
                   <h3 className="text-lg font-extrabold text-gray-800">Canal Fuera de Línea</h3>
@@ -215,14 +216,14 @@ export default function BotonSos({ currentUser }) {
                     href={smsUri}
                     className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl text-center shadow-md transition-colors"
                   >
-                    💬 Enviar SMS de Emergencia
+                    <MessageSquare className="w-4 h-4 inline mr-1" /> Enviar SMS de Emergencia
                   </a>
                   {/* Nivel 3: Llamar directo */}
                   <a
                     href={telUri}
                     className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl text-center shadow-md transition-colors animate-pulse"
                   >
-                    📞 Llamar a {contactoPrioritario.nombre}
+                    <Phone className="w-4 h-4 inline mr-1" /> Llamar a {contactoPrioritario.nombre}
                   </a>
                   <button
                     onClick={handleCancel}

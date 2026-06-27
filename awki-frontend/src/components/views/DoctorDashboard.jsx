@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { api } from '../../services/api'
 import { StompClient } from '../../services/WebSocketService'
 import VistaDocumentos from './VistaDocumentos'
+import { Radio, AlertTriangle, Siren, BellOff, Check, Stethoscope, RefreshCw, Users, FolderOpen, X } from 'lucide-react'
 
 // Sirena sintética usando Web Audio API para notificaciones críticas
 function triggerSynthesizedAlarm() {
@@ -37,18 +38,10 @@ function triggerSynthesizedAlarm() {
 }
 
 export default function DoctorDashboard() {
-<<<<<<< HEAD:awki-frontend/src/components/views/DoctorDashboard.jsx
-  const [showModal, setShowModal] = useState(false)
-  const stats = [
-    { label: 'Pacientes Activas', value: '142', icon: <img src="/paciente.png" alt="logo_persona" className='w-full h-full object-cover'></img>, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
-    { label: 'Citas Hoy', value: '8', icon: <img src="/calendario.png" alt="logo_calendario" className='w-full h-full object-cover'></img>, color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100' },
-    { label: 'Alertas', value: '3', icon: <img src="/crisis.png" alt="logo_alerta" className='w-full h-full object-cover'></img>, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
-  ]
-=======
   const [vinculos, setVinculos] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
-  
+
   // Modales y formularios
   const [showVincularModal, setShowVincularModal] = useState(false)
   const [showControlModal, setShowControlModal] = useState(false)
@@ -57,7 +50,6 @@ export default function DoctorDashboard() {
   const [codigoGenerado, setCodigoGenerado] = useState(null)
   const [codigoIngresado, setCodigoIngresado] = useState('')
   const [pacienteSeleccionada, setPacienteSeleccionada] = useState(null)
->>>>>>> 87025f8dcacebe24b06c8ef0f2ecb037881ddc2b:src/components/views/DoctorDashboard.jsx
 
   const handleOpenDocsModal = (embId) => {
     setDocsEmbarazoId(embId)
@@ -371,7 +363,7 @@ export default function DoctorDashboard() {
       {/* Banner de Estado de Conexión en Tiempo Real (Resiliencia) */}
       <div className="flex justify-between items-center bg-white rounded-2xl px-6 py-4 shadow-sm border border-gray-100">
         <div className="flex items-center gap-3">
-          <span className="text-xl">📡</span>
+          <Radio className="w-5 h-5 text-gray-500" />
           <div>
             <h4 className="font-bold text-gray-800 text-sm">Estado de Monitoreo Prenatal</h4>
             <p className="text-gray-400 text-xs mt-0.5">Conectado a la central de emergencias obstétricas.</p>
@@ -386,12 +378,12 @@ export default function DoctorDashboard() {
           )}
           {wsStatus === 'polling' && (
             <span className="bg-amber-50 text-amber-600 border border-amber-200 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide flex items-center gap-1.5">
-              ⚠️ Modo Polling (Resiliencia 15s)
+              <AlertTriangle className="w-3.5 h-3.5" /> Modo Polling (Resiliencia 15s)
             </span>
           )}
           {(wsStatus === 'disconnected' || wsStatus === 'error') && (
             <span className="bg-red-50 text-red-600 border border-red-200 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide flex items-center gap-1.5">
-              ❌ Reconectando WebSocket...
+              <X className="w-3.5 h-3.5" /> Reconectando WebSocket...
             </span>
           )}
         </div>
@@ -402,7 +394,7 @@ export default function DoctorDashboard() {
         <div className="bg-red-50/50 border-2 border-red-200 rounded-3xl p-6 shadow-md flex flex-col gap-4 animate-pulse-slow">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2.5">
-              <span className="text-2xl">🚨</span>
+              <Siren className="w-6 h-6 text-red-600" />
               <div>
                 <h2 className="text-lg font-black text-red-700">Emergencia Obstétrica en Curso</h2>
                 <p className="text-red-500 text-xs">Se requiere revisión clínica e intervención inmediata.</p>
@@ -413,7 +405,7 @@ export default function DoctorDashboard() {
                 onClick={handleSilenciarAlarma}
                 className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow-lg transition-all"
               >
-                🔕 Silenciar Alarma
+                <BellOff className="w-3.5 h-3.5 inline mr-1" /> Silenciar Alarma
               </button>
             )}
           </div>
@@ -441,7 +433,7 @@ export default function DoctorDashboard() {
                   onClick={() => handleMarcarLeida(a.id)}
                   className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-green-600 bg-gray-50 hover:bg-green-50 rounded-xl transition-all border border-gray-100"
                 >
-                  ✓ Atendida (Marcar Leída)
+                  <Check className="w-3 h-3 inline mr-1" /> Atendida (Marcar Leída)
                 </button>
               </div>
             ))}
@@ -454,7 +446,7 @@ export default function DoctorDashboard() {
         <div className="absolute -top-20 -right-20 w-64 h-64 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-full opacity-60" />
         <div className="relative">
           <div className="flex items-center gap-3 mb-2">
-            <span className="text-3xl">🩺</span>
+            <Stethoscope className="w-8 h-8 text-blue-500" />
             <p className="text-xs font-bold text-blue-500 uppercase tracking-wider">Módulo de Vinculación y Clínicas</p>
           </div>
           <h1 className="text-3xl font-extrabold text-gray-800 mb-2">Hola, Dr. de Guardia</h1>
@@ -515,7 +507,7 @@ export default function DoctorDashboard() {
       {/* Alertas y Errores */}
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-2.5 text-sm text-red-600 flex items-center gap-2">
-          <span>⚠</span> {error}
+          <AlertTriangle className="w-4 h-4 flex-shrink-0" /> {error}
         </div>
       )}
 
@@ -527,7 +519,7 @@ export default function DoctorDashboard() {
             <p className="text-gray-400 text-xs mt-0.5">Gestantes activamente enlazadas a tu consulta.</p>
           </div>
           <button onClick={cargarDirectorio} className="text-xs text-blue-500 font-bold hover:text-blue-700 transition-colors">
-            🔄 Recargar Lista
+            <RefreshCw className="w-3.5 h-3.5 inline mr-1" /> Recargar Lista
           </button>
         </div>
 
@@ -537,7 +529,7 @@ export default function DoctorDashboard() {
           </div>
         ) : vinculos.length === 0 ? (
           <div className="text-center py-16">
-            <span className="text-4xl">👥</span>
+            <Users className="w-10 h-10 text-gray-300" />
             <p className="font-bold text-gray-700 mt-3">Aún no tienes pacientes vinculadas</p>
             <p className="text-gray-400 text-xs max-w-xs mx-auto mt-1">Comparte un código de vinculación o ingresa el de una paciente para comenzar el seguimiento.</p>
           </div>
@@ -602,7 +594,7 @@ export default function DoctorDashboard() {
                                 onClick={() => handleOpenDocsModal(p.embarazo.id)}
                                 className="text-xs font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl transition-all"
                               >
-                                📁 Documentos
+                                <FolderOpen className="w-3.5 h-3.5 inline mr-1" /> Documentos
                               </button>
                               <button
                                 onClick={() => handleOpenControlModal(p)}
@@ -875,13 +867,13 @@ export default function DoctorDashboard() {
           <div className="bg-white rounded-3xl p-6 w-full max-w-4xl shadow-xl flex flex-col max-h-[90vh]">
             <div className="flex justify-between items-center mb-4 border-b border-gray-100 pb-3">
               <h2 className="font-extrabold text-lg text-gray-800 flex items-center gap-2">
-                📁 Expediente Clínico de Gestante
+                <FolderOpen className="w-5 h-5 text-blue-500" /> Expediente Clínico de Gestante
               </h2>
               <button
                 onClick={() => setShowDocsModal(false)}
-                className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors font-bold text-lg"
+                className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
             <div className="flex-1 overflow-y-auto pr-1">

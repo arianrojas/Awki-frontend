@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import AccionesRapidas from './AccionesRapidas'
 import SeccionArticulos from './SeccionArticulos'
 import { api } from '../../services/api'
+import { Heart, Check, AlertTriangle, Calendar, Scale, Syringe, Droplets, ClipboardList } from 'lucide-react'
 
 // ─── Dynamic Line Chart ───────────────────────────────────────────────────────────
 function MiniLineChart({ weights, weeks }) {
@@ -94,7 +95,9 @@ function FormRegistroEmbarazo({ currentUser, onCreated }) {
   return (
     <div className="max-w-2xl mx-auto bg-white rounded-3xl border border-pink-100 p-8 shadow-sm animate-fade-in">
       <div className="text-center mb-6">
-        <span className="text-4xl">🤰</span>
+        <div className="w-16 h-16 rounded-full bg-pink-100 flex items-center justify-center mx-auto">
+          <Heart className="w-8 h-8 text-pink-500" />
+        </div>
         <h2 className="text-2xl font-bold text-gray-800 mt-2">Registra tu embarazo</h2>
         <p className="text-gray-400 text-sm mt-1">
           Completa los datos para iniciar el asistente prenatal inteligente y realizar tu seguimiento médico.
@@ -182,7 +185,7 @@ function FormRegistroEmbarazo({ currentUser, onCreated }) {
               esMultiple ? 'bg-pink-500 border-pink-500' : 'border-gray-300 bg-white'
             }`}
           >
-            {esMultiple && <span className="text-white text-xs font-bold">✓</span>}
+            {esMultiple && <Check className="w-3 h-3 text-white" />}
           </div>
           <span className="text-xs text-gray-500 leading-relaxed">
             Tengo un diagnóstico de <span className="font-semibold text-pink-500">embarazo múltiple</span> (gemelos, mellizos, etc.)
@@ -191,7 +194,7 @@ function FormRegistroEmbarazo({ currentUser, onCreated }) {
 
         {error && (
           <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">
-            <span className="text-red-500">⚠</span>
+            <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
             <p className="text-red-600 text-sm flex-1">{error}</p>
           </div>
         )}
@@ -412,8 +415,10 @@ export default function VistaInicio({ currentUser, onPregnancyCreated }) {
                   <p className="text-gray-500 text-sm mt-2 max-w-[200px]">Tu bebé es del tamaño de {fruitSize}.</p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <div className="w-24 h-24 flex items-center justify-center text-5xl">
-                    <span className="text-6xl animate-pulse">🤰</span>
+                  <div className="w-24 h-24 flex items-center justify-center">
+                    <div className="w-20 h-20 rounded-full bg-pink-100 flex items-center justify-center animate-pulse">
+                      <Heart className="w-10 h-10 text-pink-500" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -422,7 +427,7 @@ export default function VistaInicio({ currentUser, onPregnancyCreated }) {
               <div className="mt-5">
                 <div className="flex justify-between items-center mb-2">
                   <p className="text-gray-400 text-xs font-medium">Progreso del embarazo</p>
-                  <p className="text-gray-400 text-xs">FPP: {fpp} 📅</p>
+                  <p className="text-gray-400 text-xs flex items-center gap-1">FPP: {fpp} <Calendar className="w-3 h-3" /></p>
                 </div>
                 <div className="bg-pink-50 rounded-full h-2 overflow-hidden">
                   <div className="progress-pregnancy" style={{ width: `${progressPercent}%` }} />
@@ -442,10 +447,10 @@ export default function VistaInicio({ currentUser, onPregnancyCreated }) {
                 <h3 className="font-bold text-gray-700 text-[15px] mb-4">Resumen de salud (Último Control)</h3>
                 <div className="flex flex-col gap-3">
                   {[
-                    { icon: '⚖️', label: 'Peso registrado', value: pesoActual, color: 'text-pink-500' },
-                    { icon: '💉', label: 'Presión arterial', value: presionActual, color: 'text-orange-500' },
-                    { icon: '🩸', label: 'Hemoglobina', value: hemoglobinaActual, color: 'text-red-500' },
-                    { icon: '📋', label: 'Semáforo de riesgo', value: ultimoControl?.nivelRiesgoCalculado ?? 'Verde', color: ultimoControl?.nivelRiesgoCalculado === 'ROJO' ? 'text-red-600' : ultimoControl?.nivelRiesgoCalculado === 'AMARILLO' ? 'text-amber-500' : 'text-green-500' },
+                    { icon: <Scale className="w-4 h-4" />,       label: 'Peso registrado', value: pesoActual, color: 'text-pink-500' },
+                    { icon: <Syringe className="w-4 h-4" />,     label: 'Presión arterial', value: presionActual, color: 'text-orange-500' },
+                    { icon: <Droplets className="w-4 h-4" />,    label: 'Hemoglobina', value: hemoglobinaActual, color: 'text-red-500' },
+                    { icon: <ClipboardList className="w-4 h-4" />,label: 'Semáforo de riesgo', value: ultimoControl?.nivelRiesgoCalculado ?? 'Verde', color: ultimoControl?.nivelRiesgoCalculado === 'ROJO' ? 'text-red-600' : ultimoControl?.nivelRiesgoCalculado === 'AMARILLO' ? 'text-amber-500' : 'text-green-500' },
                   ].map((m) => (
                     <div key={m.label} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
                       <div className="flex items-center gap-2">
@@ -478,8 +483,8 @@ export default function VistaInicio({ currentUser, onPregnancyCreated }) {
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-gray-700 text-[15px]">Próximo control</h3>
-                <div className="w-9 h-9 rounded-full bg-purple-100 flex items-center justify-center text-lg">
-                  📅
+                <div className="w-9 h-9 rounded-full bg-purple-100 flex items-center justify-center">
+                  <Calendar className="w-5 h-5 text-purple-500" />
                 </div>
               </div>
               <p className="text-pink-600 font-semibold text-sm mb-3">
@@ -532,7 +537,7 @@ export default function VistaInicio({ currentUser, onPregnancyCreated }) {
                             : item.active ? 'border-pink-400 bg-white'
                               : 'border-gray-200 bg-white'}`}
                         >
-                          {item.done && <span className="text-white text-xs">✓</span>}
+                          {item.done && <Check className="w-3 h-3 text-white" />}
                           {item.active && <span className="w-2.5 h-2.5 bg-pink-400 rounded-full block" />}
                         </div>
                         <div>

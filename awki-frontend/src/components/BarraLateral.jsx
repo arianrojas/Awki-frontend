@@ -1,4 +1,5 @@
 import React from 'react'
+import { Building2 } from 'lucide-react'
 
 const navItems = [
   { id: 'inicio', icon: <img src="/inicio.png" alt="logo_inicio" className='w-full h-full object-cover'></img>, label: 'Inicio' },
@@ -10,12 +11,8 @@ const navItems = [
   { id: 'educacion', icon: <img src="/educacion.png" alt="logo_educacion" className='w-full h-full object-cover'></img>, label: 'Educación' },
   { id: 'recordatorios', icon: <img src="/notificacion.png" alt="logo_notificacion" className='w-full h-full object-cover'></img>, label: 'Recordatorios' },
   { id: 'mensajes', icon: <img src="/mensaje.png" alt="logo_mensaje" className='w-full h-full object-cover'></img>, label: 'Mensajes' },
-<<<<<<< HEAD:awki-frontend/src/components/BarraLateral.jsx
   { id: 'doctor', icon: <img src="/doctor_barralateral.png" alt="logo_doctorr" className='w-full h-full object-cover'></img>, label: 'Panel Médico' },
-=======
-  { id: 'doctor', icon: <span className="text-lg leading-none">👨‍⚕️</span>, label: 'Panel Médico (Demo)' },
-  { id: 'admin_clinica', icon: <span className="text-lg leading-none">🏥</span>, label: 'Gestión Clínica (Admin)' },
->>>>>>> 87025f8dcacebe24b06c8ef0f2ecb037881ddc2b:src/components/BarraLateral.jsx
+  { id: 'admin_clinica', icon: <Building2 className="w-5 h-5" />, label: 'Gestión Clínica (Admin)' },
 ]
 
 export default function BarraLateral({ activeTab, setActiveTab, currentUser }) {

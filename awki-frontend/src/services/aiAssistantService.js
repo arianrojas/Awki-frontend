@@ -21,7 +21,7 @@ function lsSet(key, value) {
   try {
     localStorage.setItem(key, JSON.stringify(value))
   } catch (e) {
-    console.warn('⚠️ No se pudo guardar en localStorage:', key, e)
+    console.warn('No se pudo guardar en localStorage:', key, e)
   }
 }
 
@@ -60,7 +60,7 @@ export const aiAssistantService = {
    * @returns {Promise<{contenido: string, action: string|null, data: object|null, createdAt: string}>}
    */
   async processUserMessage(userInput = '', conversationHistory = []) {
-    console.log('🤖 Procesando mensaje con Awki AI:', userInput)
+    console.log('Procesando mensaje con Awki AI:', userInput)
 
     if (!userInput || typeof userInput !== 'string') {
       return {
@@ -87,7 +87,7 @@ export const aiAssistantService = {
       embarazoId = user.embarazoId || null
       semanasGestacion = user.semanasGestacion || 0
     } catch {
-      console.warn('⚠️ No se pudo leer datos de usuario del localStorage.')
+      console.warn('No se pudo leer datos de usuario del localStorage.')
     }
 
     if (token && embarazoId) {
@@ -110,7 +110,7 @@ export const aiAssistantService = {
           }
         }
       } catch (err) {
-        console.warn('⚠️ No se pudo conectar con Gemini backend. Usando motor local.', err.message)
+        console.warn('No se pudo conectar con Gemini backend. Usando motor local.', err.message)
       }
     }
 
@@ -268,7 +268,7 @@ export const aiAssistantService = {
           `• **Bienestar:** ${nivelBienestar}\n` +
           `• **Síntomas:** ${listSintomas.join(', ')}\n\n` +
           (esCritico
-            ? '⚠️ **Atención:** Has reportado síntomas de alarma obstétrica. Por favor contacta a tu médico o presiona el botón **SOS** de inmediato.'
+            ? '**ATENCION:** Has reportado síntomas de alarma obstétrica. Por favor contacta a tu médico o presiona el botón **SOS** de inmediato.'
             : '¿Hay alguna otra molestia o cambio que deseas agregar a tu reporte de hoy?')
       }
     }
@@ -349,10 +349,10 @@ export const aiAssistantService = {
     if (!aiResponseText) {
       aiResponseText =
         'Hola, soy Awki, tu asistente de salud gestacional. Puedo ayudarte a:\n' +
-        '• 📝 Registrar síntomas o molestias\n' +
-        '• ⚖️ Anotar tu peso del día\n' +
-        '• ⏰ Crear recordatorios de medicamentos\n' +
-        '• 📋 Agregar notas a tu historial clínico\n\n' +
+        '• Registrar síntomas o molestias\n' +
+        '• Anotar tu peso del día\n' +
+        '• Crear recordatorios de medicamentos\n' +
+        '• Agregar notas a tu historial clínico\n\n' +
         '¿Cómo te sientes hoy?'
     }
 

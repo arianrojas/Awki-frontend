@@ -1,12 +1,13 @@
 import React, { useState } from 'react'
+import { BookOpen, GraduationCap, Utensils, Activity, Baby, ClipboardList, Building2, Stethoscope, Clock, PenLine, X } from 'lucide-react'
 
 const CATEGORIES = [
-  { id: 'todos', name: 'Todos' },
-  { id: 'nutricion', name: '🥗 Nutrición' },
-  { id: 'ejercicio', name: '🧘 Ejercicio & Yoga' },
-  { id: 'parto', name: '🏥 Preparación al Parto' },
-  { id: 'lactancia', name: '🍼 Lactancia Materna' },
-  { id: 'bebe', name: '👶 Cuidado del Recién Nacido' },
+  { id: 'todos',     name: 'Todos' },
+  { id: 'nutricion', name: 'Nutrición',                icon: <Utensils className="w-4 h-4" /> },
+  { id: 'ejercicio', name: 'Ejercicio & Yoga',         icon: <Activity className="w-4 h-4" /> },
+  { id: 'parto',     name: 'Preparación al Parto',     icon: <Building2 className="w-4 h-4" /> },
+  { id: 'lactancia', name: 'Lactancia Materna',        icon: <Baby className="w-4 h-4" /> },
+  { id: 'bebe',      name: 'Cuidado del Recién Nacido',icon: <Baby className="w-4 h-4" /> },
 ]
 
 const ARTICLES = [
@@ -16,7 +17,7 @@ const ARTICLES = [
     title: 'Alimentación en el Embarazo: Superalimentos Esenciales',
     author: 'Dra. Elena Ramos - Nutricionista Prenatal',
     readTime: '5 min de lectura',
-    image: '🥗',
+    image: <Utensils className="w-8 h-8 text-emerald-500" />,
     summary: 'Descubre los micronutrientes esenciales como el hierro, calcio, DHA y ácido fólico que tu bebé necesita para un desarrollo óptimo en cada trimestre.',
     content: `Durante la gestación, los requerimientos nutricionales aumentan para apoyar el crecimiento fetal y la placenta.
     
@@ -30,7 +31,7 @@ const ARTICLES = [
     title: 'Yoga Prenatal: 5 Posturas para Aliviar el Dolor Lumbar',
     author: 'Lic. Sofía Mendoza - Fisioterapeuta',
     readTime: '7 min de lectura',
-    image: '🧘‍♀️',
+    image: <Activity className="w-8 h-8 text-emerald-500" />,
     summary: 'Ejercicios de estiramiento y respiración adaptados para cada etapa del embarazo, ayudando a preparar tu pelvis y reducir el estrés.',
     content: `El ejercicio moderado durante el embarazo mejora la circulación, fortalece el piso pélvico y reduce la ansiedad.
     
@@ -44,7 +45,7 @@ const ARTICLES = [
     title: 'Plan de Parto: Qué es y Cómo Prepararlo con tu Obstetriz',
     author: 'Dr. Marco Silva - Ginecobstetra',
     readTime: '6 min de lectura',
-    image: '📋',
+    image: <ClipboardList className="w-8 h-8 text-emerald-500" />,
     summary: 'Aprende a redactar tus preferencias para el día del nacimiento: manejo del dolor, acompañamiento, contacto piel con piel inmediato y corte tardío del cordón.',
     content: `Un plan de parto es un documento que guía al equipo médico sobre tus deseos respetados durante el trabajo de parto.
     
@@ -58,7 +59,7 @@ const ARTICLES = [
     title: 'Guía de Inicio Rápido para una Lactancia Exitosa',
     author: 'Dra. Carmen Luz - Consultora IBCLC',
     readTime: '8 min de lectura',
-    image: '🍼',
+    image: <Baby className="w-8 h-8 text-emerald-500" />,
     summary: 'Técnicas de agarre correcto, prevención de grietas y comprensión del calostro en los primeros días tras el nacimiento.',
     content: `La lactancia materna es un proceso de aprendizaje mutuo entre la mamá y el bebé.
     
@@ -72,7 +73,7 @@ const ARTICLES = [
     title: 'Primeros Cuidados del Recién Nacido en Casa',
     author: 'Dr. Roberto Vargas - Pediatra',
     readTime: '10 min de lectura',
-    image: '👶',
+    image: <Baby className="w-8 h-8 text-emerald-500" />,
     summary: 'Limpieza del cordón umbilical, patrón de sueño seguro, baño del bebé y señales de alerta pediátricas.',
     content: `Llegar a casa con el bebé puede generar dudas. Aquí están las pautas fundamentales:
     
@@ -95,16 +96,16 @@ export default function VistaEducacion() {
       {/* Header Banner */}
       <div className="rounded-3xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 p-8 text-white shadow-lg relative overflow-hidden">
         <div className="relative z-10 max-w-2xl">
-          <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold uppercase tracking-wider mb-3">
-            📚 Portal Educativo Materno
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold uppercase tracking-wider mb-3">
+            <BookOpen className="w-3.5 h-3.5" /> Portal Educativo Materno
           </span>
           <h2 className="text-3xl font-black mb-2">Aprende y Prepárate para la Maternidad</h2>
           <p className="text-white/90 text-sm leading-relaxed">
             Guías clínicas, artículos validados por especialistas y recursos interactivos para acompañar cada paso de tu embarazo y los primeros días de tu bebé.
           </p>
         </div>
-        <div className="absolute right-4 bottom-[-10px] text-8xl opacity-30 select-none">
-          🎓
+        <div className="absolute right-4 bottom-[-10px] opacity-20 select-none">
+          <GraduationCap className="w-24 h-24" />
         </div>
       </div>
 
@@ -114,13 +115,13 @@ export default function VistaEducacion() {
           <button
             key={cat.id}
             onClick={() => setSelectedCategory(cat.id)}
-            className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
+            className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5 ${
               selectedCategory === cat.id
                 ? 'bg-emerald-600 text-white shadow-md shadow-emerald-200 scale-105'
                 : 'bg-white text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 border border-gray-100'
             }`}
           >
-            {cat.name}
+            {cat.icon}{cat.name}
           </button>
         ))}
       </div>
@@ -135,11 +136,11 @@ export default function VistaEducacion() {
           >
             <div>
               <div className="flex items-center justify-between mb-4">
-                <span className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
+                <span className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center group-hover:scale-110 transition-transform">
                   {article.image}
                 </span>
-                <span className="text-xs font-medium text-gray-400 bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
-                  ⏱️ {article.readTime}
+                <span className="text-xs font-medium text-gray-400 bg-gray-50 px-3 py-1 rounded-full border border-gray-100 flex items-center gap-1">
+                  <Clock className="w-3 h-3" /> {article.readTime}
                 </span>
               </div>
 
@@ -152,8 +153,8 @@ export default function VistaEducacion() {
             </div>
 
             <div className="pt-4 border-t border-gray-50 flex items-center justify-between">
-              <span className="text-[11px] font-semibold text-emerald-700 truncate max-w-[200px]">
-                👨‍⚕️ {article.author}
+              <span className="text-[11px] font-semibold text-emerald-700 truncate max-w-[200px] flex items-center gap-1">
+                <Stethoscope className="w-3 h-3 flex-shrink-0" /> {article.author}
               </span>
               <span className="text-xs font-bold text-emerald-600 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                 Leer artículo →
@@ -169,13 +170,13 @@ export default function VistaEducacion() {
           <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl p-8 animate-fade-in relative">
             <button
               onClick={() => setSelectedArticle(null)}
-              className="absolute top-6 right-6 w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 font-bold transition-colors"
+              className="absolute top-6 right-6 w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors"
             >
-              ✕
+              <X className="w-4 h-4" />
             </button>
 
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-4xl">{selectedArticle.image}</span>
+              <span className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center">{selectedArticle.image}</span>
               <div>
                 <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">
                   {selectedArticle.category}
@@ -187,9 +188,9 @@ export default function VistaEducacion() {
             </div>
 
             <div className="flex items-center gap-4 text-xs text-gray-500 pb-4 mb-6 border-b border-gray-100">
-              <span>✍️ {selectedArticle.author}</span>
+              <span className="flex items-center gap-1"><PenLine className="w-3 h-3" /> {selectedArticle.author}</span>
               <span>•</span>
-              <span>⏱️ {selectedArticle.readTime}</span>
+              <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {selectedArticle.readTime}</span>
             </div>
 
             <div className="prose prose-emerald max-w-none text-gray-700 text-sm leading-relaxed whitespace-pre-line bg-emerald-50/50 p-6 rounded-2xl border border-emerald-100/60 mb-6">

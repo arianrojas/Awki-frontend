@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Bell, X, Plus, Calendar, Clock, Check } from 'lucide-react'
 
 export default function VistaRecordatorios() {
   const [recordatorios, setRecordatorios] = useState([])
@@ -57,14 +58,14 @@ export default function VistaRecordatorios() {
     <div className="flex flex-col gap-6 max-w-4xl mx-auto pb-12">
       <div className="flex justify-between items-center gap-4">
         <div className="flex flex-col gap-1">
-          <h2 className="text-2xl font-bold text-gray-800">🔔 Recordatorios y Medicamentos</h2>
+          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2"><Bell className="w-6 h-6 text-pink-500" /> Recordatorios y Medicamentos</h2>
           <p className="text-gray-400 text-sm">Organiza y activa alarmas para tus vitaminas (ácido fólico, hierro) y medicamentos durante tu gestación.</p>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-xl text-xs font-bold transition-all shadow-md flex-shrink-0"
+          className="px-4 py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-xl text-xs font-bold transition-all shadow-md flex-shrink-0 flex items-center gap-1.5"
         >
-          {showForm ? '✕ Cancelar' : '＋ Nuevo Recordatorio'}
+          {showForm ? <><X className="w-3.5 h-3.5" /> Cancelar</> : <><Plus className="w-3.5 h-3.5" /> Nuevo Recordatorio</>}
         </button>
       </div>
 
@@ -73,7 +74,7 @@ export default function VistaRecordatorios() {
         {/* Formulario */}
         {showForm && (
           <div className="bg-white rounded-3xl p-5 border border-pink-100/50 shadow-sm flex flex-col gap-4 animate-fade-in h-fit">
-            <h4 className="font-bold text-gray-800 text-sm">🔔 Agregar Alarma</h4>
+            <h4 className="font-bold text-gray-800 text-sm flex items-center gap-1.5"><Bell className="w-4 h-4 text-pink-400" /> Agregar Alarma</h4>
             <form onSubmit={handleCrear} className="flex flex-col gap-3">
               <div>
                 <label className="text-[10px] font-bold text-gray-400 uppercase">¿De qué recordarte?</label>
@@ -118,10 +119,10 @@ export default function VistaRecordatorios() {
         {/* Listado de alarmas */}
         <div className={`${showForm ? 'md:col-span-2' : 'md:col-span-3'} bg-white rounded-3xl p-6 border border-pink-100/50 shadow-sm flex flex-col gap-4`}>
           <h3 className="font-bold text-gray-800 text-base">Mis Recordatorios Activos</h3>
-          
+
           {recordatorios.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <span className="text-4xl mb-3">🔔</span>
+              <Bell className="w-10 h-10 text-gray-300 mb-3" />
               <p className="text-gray-400 text-sm">No tienes alarmas o recordatorios activos.</p>
             </div>
           ) : (
@@ -141,7 +142,7 @@ export default function VistaRecordatorios() {
                         ${r.completado ? 'bg-green-500 border-green-500 text-white' : 'border-gray-200 hover:border-pink-300 bg-white'}
                       `}
                     >
-                      {r.completado && <span className="text-xs font-bold">✓</span>}
+                      {r.completado && <Check className="w-3 h-3 text-white" />}
                     </button>
 
                     <div className="flex flex-col gap-0.5">
@@ -149,18 +150,18 @@ export default function VistaRecordatorios() {
                         {r.titulo}
                       </span>
                       <div className="flex items-center gap-2 text-[10px] text-gray-400 font-bold mt-0.5">
-                        <span>📅 {new Date(r.fecha + 'T00:00:00').toLocaleDateString('es-PE', { day: '2-digit', month: 'short' })}</span>
-                        <span>⏰ {r.hora}</span>
+                        <span className="flex items-center gap-0.5"><Calendar className="w-2.5 h-2.5" /> {new Date(r.fecha + 'T00:00:00').toLocaleDateString('es-PE', { day: '2-digit', month: 'short' })}</span>
+                        <span className="flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" /> {r.hora}</span>
                       </div>
                     </div>
                   </div>
 
                   <button
                     onClick={() => handleEliminar(r.id)}
-                    className="w-8 h-8 rounded-lg hover:bg-red-50 text-red-500 border border-transparent hover:border-red-200 flex items-center justify-center transition-colors text-sm"
+                    className="w-8 h-8 rounded-lg hover:bg-red-50 text-red-500 border border-transparent hover:border-red-200 flex items-center justify-center transition-colors"
                     title="Eliminar recordatorio"
                   >
-                    ✕
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
               ))}

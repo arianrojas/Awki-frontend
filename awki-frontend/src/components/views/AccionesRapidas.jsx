@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { createPortal } from 'react-dom'
+import { Calendar, Heart, Scale, Bell, AlertTriangle } from 'lucide-react'
 
 export default function AccionesRapidas({ onActionComplete }) {
   const [modalAbierto, setModalAbierto] = useState(null)
@@ -111,7 +112,7 @@ export default function AccionesRapidas({ onActionComplete }) {
     localStorage.setItem('awki_diario_sintomas', JSON.stringify(listaControles))
 
     if (tieneSintomasCriticos) {
-      alert("⚠️ ALERTA DE RIESGO: Has reportado síntomas que podrían ser signos de alarma obstétrica. Por favor, pulsa el botón rojo SOS para contactar de inmediato a tu contacto de emergencia.")
+      alert("ALERTA DE RIESGO: Has reportado síntomas que podrían ser signos de alarma obstétrica. Por favor, pulsa el botón rojo SOS para contactar de inmediato a tu contacto de emergencia.")
     }
 
     // Resetear formulario
@@ -157,7 +158,7 @@ export default function AccionesRapidas({ onActionComplete }) {
           {modalAbierto === 'cita' && (
             <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[100] p-4">
               <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-xl border border-pink-100">
-                <h2 className="font-bold text-lg text-gray-800 mb-1">📅 Agendar Cita Obstétrica</h2>
+                <h2 className="font-bold text-lg text-gray-800 mb-1 flex items-center gap-2"><Calendar className="w-5 h-5 text-pink-500" /> Agendar Cita Obstétrica</h2>
                 <p className="text-sm text-gray-400 mb-4">Elige cuándo te gustaría agendar tu próxima consulta médica.</p>
                 
                 <form onSubmit={handleGuardarCita} className="flex flex-col gap-4">
@@ -247,7 +248,7 @@ export default function AccionesRapidas({ onActionComplete }) {
           {modalAbierto === 'control' && (
             <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[100] p-4">
               <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-xl border border-pink-100">
-                <h2 className="font-bold text-lg text-gray-800 mb-1">🤰 Registro de Bienestar Diario</h2>
+                <h2 className="font-bold text-lg text-gray-800 mb-1 flex items-center gap-2"><Heart className="w-5 h-5 text-pink-500" /> Registro de Bienestar Diario</h2>
                 <p className="text-sm text-gray-400 mb-4">Anota tus síntomas diarios para el seguimiento clínico de tu embarazo.</p>
                 
                 <form onSubmit={handleGuardarControl} className="flex flex-col gap-4">
@@ -294,8 +295,8 @@ export default function AccionesRapidas({ onActionComplete }) {
                   </div>
 
                   {sintomaAlarmaCritico && (
-                    <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl p-3 text-xs leading-relaxed font-semibold">
-                      ⚠️ ¡Alerta! El síntoma escrito coincide con un signo de alarma obstétrica. Si el dolor es severo, sangras o pierdes líquido, usa el botón rojo SOS de emergencia.
+                    <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl p-3 text-xs leading-relaxed font-semibold flex items-start gap-2">
+                      <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" /> ¡Alerta! El síntoma escrito coincide con un signo de alarma obstétrica. Si el dolor es severo, sangras o pierdes líquido, usa el botón rojo SOS de emergencia.
                     </div>
                   )}
 
@@ -323,7 +324,7 @@ export default function AccionesRapidas({ onActionComplete }) {
           {modalAbierto === 'peso' && (
             <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[100] p-4">
               <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-xl border border-pink-100">
-                <h2 className="font-bold text-lg text-gray-800 mb-1">⚖️ Registrar Peso Corporal</h2>
+                <h2 className="font-bold text-lg text-gray-800 mb-1 flex items-center gap-2"><Scale className="w-5 h-5 text-green-500" /> Registrar Peso Corporal</h2>
                 <p className="text-sm text-gray-400 mb-4">Lleva el seguimiento diario de tu peso para auditar la curva de evolución.</p>
                 
                 <form onSubmit={handleGuardarPeso} className="flex flex-col gap-4">
@@ -376,7 +377,7 @@ export default function AccionesRapidas({ onActionComplete }) {
           {modalAbierto === 'recordatorio' && (
             <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[100] p-4">
               <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-xl border border-pink-100">
-                <h2 className="font-bold text-lg text-gray-800 mb-1">🔔 Crear Nuevo Recordatorio</h2>
+                <h2 className="font-bold text-lg text-gray-800 mb-1 flex items-center gap-2"><Bell className="w-5 h-5 text-amber-500" /> Crear Nuevo Recordatorio</h2>
                 <p className="text-sm text-gray-400 mb-4">Crea una alarma para tus vitaminas, medicamentos o actividades clínicas.</p>
                 
                 <form onSubmit={handleGuardarRecordatorio} className="flex flex-col gap-4">

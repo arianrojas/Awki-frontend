@@ -1,4 +1,5 @@
 import React from 'react'
+import { MapPin, PenLine, Search, BarChart2, Image, Target, Zap, Upload } from 'lucide-react'
 
 const placeholderViews = {
   embarazo: {
@@ -81,7 +82,7 @@ export default function VistaPendiente({ tab }) {
             style={{ animationDelay: `${i * 80}ms` }}
           >
             <div className="w-10 h-10 rounded-xl bg-pink-50 group-hover:bg-pink-100 flex items-center justify-center text-2xl mb-3 transition-colors">
-              {['📌', '📝', '🔍', '📊', '🖼️', '🎯', '⚡', '📤'][i % 8]}
+              {[<MapPin className="w-5 h-5 text-pink-400" />, <PenLine className="w-5 h-5 text-pink-400" />, <Search className="w-5 h-5 text-pink-400" />, <BarChart2 className="w-5 h-5 text-pink-400" />, <Image className="w-5 h-5 text-pink-400" />, <Target className="w-5 h-5 text-pink-400" />, <Zap className="w-5 h-5 text-pink-400" />, <Upload className="w-5 h-5 text-pink-400" />][i % 8]}
             </div>
             <p className="font-semibold text-gray-700 text-sm group-hover:text-pink-600 transition-colors">{item}</p>
             <p className="text-gray-400 text-xs mt-1">Próximamente disponible</p>

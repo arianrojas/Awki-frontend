@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { decodeJwt } from '../../services/api'
+import { AlertTriangle, X, Heart, CheckCircle, Check } from 'lucide-react'
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080'
 
@@ -38,9 +39,9 @@ function Campo({ label, type = 'text', value, onChange, placeholder, disabled })
 function ErrorBanner({ msg, onClose }) {
   return (
     <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">
-      <span className="text-red-500">⚠</span>
+      <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
       <p className="text-red-600 text-sm flex-1">{msg}</p>
-      <button onClick={onClose} className="text-red-400 hover:text-red-600 ml-auto text-xs">✕</button>
+      <button onClick={onClose} className="text-red-400 hover:text-red-600 ml-auto"><X className="w-3.5 h-3.5" /></button>
     </div>
   )
 }
@@ -200,7 +201,9 @@ function FormRegistro({ onRegistroExitoso }) {
   if (exito) {
     return (
       <div className="flex flex-col items-center gap-4 py-6 text-center">
-        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center text-4xl shadow-inner">✅</div>
+        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center shadow-inner">
+          <CheckCircle className="w-9 h-9 text-green-500" />
+        </div>
         <div>
           <p className="font-bold text-gray-800 text-lg mb-1">¡Cuenta creada!</p>
           <p className="text-gray-500 text-sm leading-relaxed max-w-xs">
@@ -242,7 +245,7 @@ function FormRegistro({ onRegistroExitoso }) {
             form.consentimientoIa ? 'bg-pink-500 border-pink-500' : 'border-gray-300 bg-white'
           }`}
         >
-          {form.consentimientoIa && <span className="text-white text-xs font-bold">✓</span>}
+          {form.consentimientoIa && <Check className="w-3 h-3 text-white" />}
         </div>
         <span className="text-xs text-gray-500 leading-relaxed group-hover:text-gray-700 transition-colors">
           Acepto el uso de <span className="font-semibold text-pink-500">inteligencia artificial</span> para el análisis y seguimiento de mis síntomas durante el embarazo
@@ -275,7 +278,7 @@ export default function VistaLogin({ onLoginSuccess }) {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex w-20 h-20 rounded-3xl bg-gradient-to-br from-pink-400 to-purple-600 items-center justify-center shadow-xl shadow-pink-200/50 mb-4">
-            <span className="text-4xl">🤰</span>
+            <Heart className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-3xl font-extrabold text-gray-800 tracking-tight">Awki</h1>
           <p className="text-gray-400 text-sm mt-1.5">Tu acompañante de salud prenatal</p>

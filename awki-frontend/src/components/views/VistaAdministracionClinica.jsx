@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Building2, Plus, Check, X, Stethoscope, Heart, AlertTriangle, Calendar } from 'lucide-react'
 
 export default function VistaAdministracionClinica() {
   const [metricas, setMetricas] = useState({
@@ -73,13 +74,13 @@ export default function VistaAdministracionClinica() {
       })
 
       if (res.ok) {
-        setMessage('✅ Médico registrado exitosamente en la clínica.')
+        setMessage('OK Médico registrado exitosamente en la clínica.')
         setShowRegisterModal(false)
         setNewMedico({ nombre: '', email: '', password: '', colegioMedico: '', especialidad: 'Ginecología y Obstetricia' })
         fetchData()
       } else {
         const errData = await res.json()
-        setMessage(`❌ Error: ${errData.message || 'No se pudo registrar al médico.'}`)
+        setMessage(`ERR Error: ${errData.message || 'No se pudo registrar al médico.'}`)
       }
     } catch (err) {
       // Demo fallback
@@ -93,7 +94,7 @@ export default function VistaAdministracionClinica() {
         pacientesAsignadas: 0
       }])
       setMetricas(prev => ({ ...prev, totalMedicos: prev.totalMedicos + 1 }))
-      setMessage('✅ Médico registrado localmente (Modo Demo).')
+      setMessage('OK Médico registrado localmente (Modo Demo).')
       setShowRegisterModal(false)
     } finally {
       setLoading(false)
@@ -121,8 +122,8 @@ export default function VistaAdministracionClinica() {
       <div className="rounded-3xl bg-gradient-to-r from-purple-700 via-indigo-600 to-blue-600 p-8 text-white shadow-xl relative overflow-hidden">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold uppercase tracking-wider mb-2">
-              🏥 Panel de Administración Institucional
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold uppercase tracking-wider mb-2">
+              <Building2 className="w-3.5 h-3.5" /> Panel de Administración Institucional
             </span>
             <h2 className="text-3xl font-black">{metricas.nombreClinica}</h2>
             <p className="text-white/80 text-sm mt-1">Gestión de staff médico, licencias SaaS y métricas materno-infantiles.</p>
@@ -131,22 +132,23 @@ export default function VistaAdministracionClinica() {
             onClick={() => setShowRegisterModal(true)}
             className="px-5 py-3 bg-white text-purple-700 hover:bg-purple-50 font-bold rounded-2xl shadow-lg transition-all transform hover:scale-105 flex items-center gap-2 self-start md:self-auto text-sm"
           >
-            ➕ Registrar Nuevo Médico
+            <Plus className="w-4 h-4" /> Registrar Nuevo Médico
           </button>
         </div>
       </div>
 
       {message && (
-        <div className={`p-4 rounded-2xl text-sm font-semibold ${message.startsWith('✅') ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}`}>
-          {message}
+        <div className={`p-4 rounded-2xl text-sm font-semibold flex items-center gap-2 ${message.startsWith('OK') ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}`}>
+          {message.startsWith('OK') ? <Check className="w-4 h-4 flex-shrink-0" /> : <X className="w-4 h-4 flex-shrink-0" />}
+          {message.replace(/^(OK|ERR) /, '')}
         </div>
       )}
 
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-2xl font-bold">
-            👨‍⚕️
+          <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
+            <Stethoscope className="w-6 h-6" />
           </div>
           <div>
             <p className="text-gray-400 text-xs font-medium">Staff Médico</p>
@@ -155,8 +157,8 @@ export default function VistaAdministracionClinica() {
         </div>
 
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-pink-50 text-pink-600 flex items-center justify-center text-2xl font-bold">
-            🤰
+          <div className="w-12 h-12 rounded-2xl bg-pink-50 text-pink-600 flex items-center justify-center">
+            <Heart className="w-6 h-6" />
           </div>
           <div>
             <p className="text-gray-400 text-xs font-medium">Gestantes Activas</p>
@@ -165,8 +167,8 @@ export default function VistaAdministracionClinica() {
         </div>
 
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-2xl font-bold">
-            ⚠️
+          <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center">
+            <AlertTriangle className="w-6 h-6" />
           </div>
           <div>
             <p className="text-gray-400 text-xs font-medium">Casos de Alto Riesgo</p>
@@ -175,8 +177,8 @@ export default function VistaAdministracionClinica() {
         </div>
 
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl font-bold">
-            📅
+          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <Calendar className="w-6 h-6" />
           </div>
           <div>
             <p className="text-gray-400 text-xs font-medium">Controles este Mes</p>
@@ -254,9 +256,9 @@ export default function VistaAdministracionClinica() {
           <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl p-6 animate-fade-in relative">
             <button
               onClick={() => setShowRegisterModal(false)}
-              className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 font-bold text-lg"
+              className="absolute top-5 right-5 text-gray-400 hover:text-gray-600 transition-colors"
             >
-              ✕
+              <X className="w-5 h-5" />
             </button>
             <h3 className="text-xl font-black text-gray-800 mb-1">Registrar Nuevo Médico</h3>
             <p className="text-xs text-gray-400 mb-6">Asigna credenciales de acceso para el personal médico colegiado.</p>

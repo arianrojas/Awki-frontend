@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { createPortal } from 'react-dom'
+import { X } from 'lucide-react'
 
 // ─── Articulos y consejos ──────────────────────────────────────────────────────────────
 const articles = [
@@ -269,7 +270,7 @@ function ArticleModal({ article, onClose }) {
             onClick={onClose}
             className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/70 hover:bg-white flex items-center justify-center text-gray-500 hover:text-gray-800 transition-all duration-200 shadow-sm"
           >
-            ✕
+            <X className="w-4 h-4" />
           </button>
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-2xl bg-white/60 flex items-center justify-center text-4xl shadow-inner">
@@ -366,8 +367,8 @@ export default function SeccionArticulos() {
                 <span className={`inline-block mt-2 px-2 py-0.5 rounded-full text-[10px] font-bold ${art.tagColor}`}>
                   {art.tag}
                 </span>
-                <p className="text-gray-400 text-[10px] mt-2 flex items-center gap-1">
-                  <span>👆</span> Toca para leer
+                <p className="text-gray-400 text-[10px] mt-2">
+                  Toca para leer
                 </p>
               </div>
             </button>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { api } from '../../services/api'
+import { Stethoscope, AlertTriangle, Check } from 'lucide-react'
 
 export default function PacienteForm({ currentUser, onVinculacionComplete }) {
   const [codigoInput, setCodigoInput] = useState('')
@@ -115,8 +116,8 @@ export default function PacienteForm({ currentUser, onVinculacionComplete }) {
 
           {isVinculado ? (
             <div className="flex flex-col items-center gap-4 text-center py-6 flex-1 justify-center">
-              <div className="w-16 h-16 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center text-3xl">
-                👨‍⚕️
+              <div className="w-16 h-16 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center">
+                <Stethoscope className="w-8 h-8 text-purple-500" />
               </div>
               <div>
                 <p className="font-bold text-gray-800">¡Tu cuenta está vinculada!</p>
@@ -185,13 +186,13 @@ export default function PacienteForm({ currentUser, onVinculacionComplete }) {
 
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-2.5 text-xs text-red-600 flex items-center gap-2">
-              <span>⚠</span> {error}
+              <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" /> {error}
             </div>
           )}
 
           {successMsg && (
             <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-2.5 text-xs text-green-600 flex items-center gap-2">
-              <span>✓</span> {successMsg}
+              <Check className="w-3.5 h-3.5 flex-shrink-0" /> {successMsg}
             </div>
           )}
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { api } from '../../services/api'
+import { Calendar, Clock, Check, X, Plus } from 'lucide-react'
 
 export default function VistaControlesCitas() {
   const [controles, setControles] = useState([])
@@ -108,14 +109,14 @@ export default function VistaControlesCitas() {
     <div className="flex flex-col gap-6 max-w-6xl mx-auto pb-12">
       <div className="flex justify-between items-center gap-4">
         <div className="flex flex-col gap-1">
-          <h2 className="text-2xl font-bold text-gray-800">📅 Agenda de Citas y Controles</h2>
+          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2"><Calendar className="w-6 h-6 text-pink-500" /> Agenda de Citas y Controles</h2>
           <p className="text-gray-400 text-sm">Gestiona tus consultas médicas programadas y monitorea el cumplimiento de tus controles obstétricos obligatorios.</p>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-xl text-xs font-bold transition-all shadow-md flex-shrink-0"
+          className="px-4 py-2.5 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-xl text-xs font-bold transition-all shadow-md flex-shrink-0 flex items-center gap-1.5"
         >
-          {showForm ? '✕ Cerrar Agenda' : '＋ Programar Cita'}
+          {showForm ? <><X className="w-3.5 h-3.5" /> Cerrar Agenda</> : <><Plus className="w-3.5 h-3.5" /> Programar Cita</>}
         </button>
       </div>
 
@@ -124,7 +125,7 @@ export default function VistaControlesCitas() {
         {/* Panel Izquierdo: Checklist oficial */}
         <div className="lg:col-span-2 bg-white rounded-3xl p-6 border border-pink-100/50 shadow-sm flex flex-col gap-4">
           <h3 className="font-bold text-gray-800 text-base">Checklist Clínico Obligatorio</h3>
-          
+
           {cargando ? (
             <div className="flex justify-center items-center py-20">
               <span className="w-8 h-8 border-3 border-pink-300 border-t-pink-600 rounded-full animate-spin" />
@@ -139,10 +140,10 @@ export default function VistaControlesCitas() {
                   `}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
                       item.realizado ? 'bg-green-100 text-green-700' : item.active ? 'bg-pink-100 text-pink-700 animate-pulse' : 'bg-gray-100 text-gray-500'
                     }`}>
-                      {item.realizado ? '✓ Completado' : item.active ? 'Próximo control' : 'Pendiente'}
+                      {item.realizado ? <><Check className="w-2.5 h-2.5" /> Completado</> : item.active ? 'Próximo control' : 'Pendiente'}
                     </span>
                     {item.fechaRealizado && (
                       <span className="text-[10px] text-gray-400 font-bold">
@@ -163,7 +164,7 @@ export default function VistaControlesCitas() {
           {/* Formulario */}
           {showForm && (
             <div className="bg-white rounded-3xl p-5 border border-pink-100/50 shadow-sm flex flex-col gap-4 animate-fade-in">
-              <h4 className="font-bold text-gray-700 text-sm">📅 Nueva Cita</h4>
+              <h4 className="font-bold text-gray-700 text-sm flex items-center gap-1.5"><Calendar className="w-4 h-4 text-pink-400" /> Nueva Cita</h4>
               <form onSubmit={handleCrearCita} className="flex flex-col gap-3">
                 <select
                   value={citaTipo}
@@ -217,10 +218,10 @@ export default function VistaControlesCitas() {
           {/* Listado de Citas Agendadas */}
           <div className="bg-white rounded-3xl p-5 border border-pink-100/50 shadow-sm flex-1 flex flex-col gap-4">
             <h3 className="font-bold text-gray-800 text-sm">Mis Citas Agendadas</h3>
-            
+
             {citasLocales.length === 0 ? (
               <div className="text-center py-10 flex flex-col gap-1 items-center justify-center">
-                <span className="text-2xl">📅</span>
+                <Calendar className="w-8 h-8 text-gray-300 mb-1" />
                 <p className="text-gray-400 text-xs">No tienes citas agendadas aún.</p>
               </div>
             ) : (
@@ -234,24 +235,24 @@ export default function VistaControlesCitas() {
                           <button
                             onClick={() => handleCompletarCita(c.id)}
                             title="Marcar completada"
-                            className="text-[10px] bg-green-50 text-green-600 border border-green-200 px-1.5 py-0.5 rounded font-bold"
+                            className="text-[10px] bg-green-50 text-green-600 border border-green-200 px-1.5 py-0.5 rounded font-bold flex items-center gap-0.5"
                           >
-                            ✓
+                            <Check className="w-2.5 h-2.5" />
                           </button>
                         )}
                         <button
                           onClick={() => handleEliminarCita(c.id)}
                           title="Eliminar"
-                          className="text-[10px] bg-red-50 text-red-500 border border-red-200 px-1.5 py-0.5 rounded font-bold"
+                          className="text-[10px] bg-red-50 text-red-500 border border-red-200 px-1.5 py-0.5 rounded font-bold flex items-center gap-0.5"
                         >
-                          ✕
+                          <X className="w-2.5 h-2.5" />
                         </button>
                       </div>
                     </div>
                     <p className="text-[10px] text-gray-500 font-medium">Con {c.especialista}</p>
                     <div className="flex justify-between items-center text-[10px] text-gray-400 font-bold border-t border-gray-50 pt-1.5 mt-0.5">
-                      <span>📅 {new Date(c.fecha + 'T00:00:00').toLocaleDateString('es-PE', { day: '2-digit', month: 'short' })}</span>
-                      <span>⏰ {c.hora}</span>
+                      <span className="flex items-center gap-0.5"><Calendar className="w-2.5 h-2.5" /> {new Date(c.fecha + 'T00:00:00').toLocaleDateString('es-PE', { day: '2-digit', month: 'short' })}</span>
+                      <span className="flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" /> {c.hora}</span>
                     </div>
                   </div>
                 ))}

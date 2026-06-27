@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react'
+import { Stethoscope, PenLine, Calendar, Tag, AlertTriangle, Check, Frown, Bandage, Eye, Bell, Droplets, Droplet, Flame, Zap, Smile, Meh, Moon, Star } from 'lucide-react'
 
 const SINTOMAS_CLINICOS = [
-  { id: 'nauseas', label: '🤢 Náuseas / Vómitos', tipo: 'LEVE' },
-  { id: 'cefalea', label: '🤕 Cefalea / Dolor de Cabeza', tipo: 'MODERADO' },
-  { id: 'vision_borrosa', label: '👁️ Visión Borrosa / Luces', tipo: 'ALARMA' },
-  { id: 'tinnitus', label: '🔔 Zumbido de Oídos', tipo: 'ALARMA' },
-  { id: 'epigastralgia', label: '💥 Dolor en la Boca del Estómago', tipo: 'ALARMA' },
-  { id: 'sangrado', label: '🩸 Sangrado Vaginal', tipo: 'ALARMA' },
-  { id: 'liquido', label: '💧 Pérdida de Líquido', tipo: 'ALARMA' },
-  { id: 'ardor_orinar', label: '🔥 Ardor al Orinar', tipo: 'MODERADO' },
-  { id: 'fatiga', label: '😴 Cansancio / Fatiga Extrema', tipo: 'LEVE' },
-  { id: 'reflujo', label: '🔥 Acidez / Reflujo', tipo: 'LEVE' },
+  { id: 'nauseas',        texto: 'Náuseas / Vómitos',                icon: <Frown className="w-3.5 h-3.5" />,    tipo: 'LEVE' },
+  { id: 'cefalea',        texto: 'Cefalea / Dolor de Cabeza',        icon: <Bandage className="w-3.5 h-3.5" />,  tipo: 'MODERADO' },
+  { id: 'vision_borrosa', texto: 'Visión Borrosa / Luces',           icon: <Eye className="w-3.5 h-3.5" />,      tipo: 'ALARMA' },
+  { id: 'tinnitus',       texto: 'Zumbido de Oídos',                 icon: <Bell className="w-3.5 h-3.5" />,     tipo: 'ALARMA' },
+  { id: 'epigastralgia',  texto: 'Dolor en la Boca del Estómago',    icon: <Zap className="w-3.5 h-3.5" />,      tipo: 'ALARMA' },
+  { id: 'sangrado',       texto: 'Sangrado Vaginal',                  icon: <Droplets className="w-3.5 h-3.5" />, tipo: 'ALARMA' },
+  { id: 'liquido',        texto: 'Pérdida de Líquido',               icon: <Droplet className="w-3.5 h-3.5" />,  tipo: 'ALARMA' },
+  { id: 'ardor_orinar',   texto: 'Ardor al Orinar',                  icon: <Flame className="w-3.5 h-3.5" />,    tipo: 'MODERADO' },
+  { id: 'fatiga',         texto: 'Cansancio / Fatiga Extrema',       icon: <Moon className="w-3.5 h-3.5" />,     tipo: 'LEVE' },
+  { id: 'reflujo',        texto: 'Acidez / Reflujo',                 icon: <Flame className="w-3.5 h-3.5" />,    tipo: 'LEVE' },
 ]
 
 export default function VistaSintomas() {
@@ -62,7 +63,7 @@ export default function VistaSintomas() {
 
     const nombresSintomas = sintomasSeleccionados.map(sId => {
       const item = SINTOMAS_CLINICOS.find(c => c.id === sId)
-      return item ? item.label.replace(/^[^\s]+\s/, '') : sId
+      return item ? item.texto : sId
     })
 
     const lista = JSON.parse(localStorage.getItem('awki_diario_sintomas') || '[]')
@@ -92,19 +93,19 @@ export default function VistaSintomas() {
     cargarSintomas()
   }
 
-  const getEmojiBienestar = (b) => {
+  const getIconBienestar = (b) => {
     switch (b) {
-      case 'Excelente': return '🌟'
-      case 'Bien': return '😊'
-      case 'Regular': return '😐'
-      default: return '🤕'
+      case 'Excelente': return <Star className="w-5 h-5 text-yellow-400" />
+      case 'Bien':      return <Smile className="w-5 h-5 text-green-500" />
+      case 'Regular':   return <Meh className="w-5 h-5 text-amber-400" />
+      default:          return <Bandage className="w-5 h-5 text-red-400" />
     }
   }
 
   return (
     <div className="flex flex-col gap-6 max-w-6xl mx-auto pb-12 animate-fade-in">
       <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-bold text-gray-800">🩺 Diario de Síntomas & Clasificación Clínica</h2>
+        <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2"><Stethoscope className="w-6 h-6 text-pink-500" /> Diario de Síntomas &amp; Clasificación Clínica</h2>
         <p className="text-gray-400 text-sm">Monitoreo activo integrado con el Motor de Evaluación de Riesgos Obstetritos.</p>
       </div>
 
@@ -112,7 +113,7 @@ export default function VistaSintomas() {
 
         {/* Formulario de registro */}
         <div className="bg-white rounded-3xl p-6 border border-pink-100/50 shadow-sm flex flex-col gap-5 h-fit">
-          <h3 className="font-bold text-gray-700 text-base">📝 ¿Cómo te sientes hoy?</h3>
+          <h3 className="font-bold text-gray-700 text-base flex items-center gap-2"><PenLine className="w-4 h-4 text-pink-400" /> ¿Cómo te sientes hoy?</h3>
           
           <form onSubmit={handleGuardar} className="flex flex-col gap-4">
             
@@ -129,7 +130,7 @@ export default function VistaSintomas() {
                       ${bienestarDia === b ? 'bg-pink-500 border-pink-500 text-white shadow-sm shadow-pink-100' : 'border-gray-200 hover:border-pink-300 text-gray-600 bg-white'}
                     `}
                   >
-                    <span className="text-lg">{getEmojiBienestar(b)}</span>
+                    {getIconBienestar(b)}
                     {b}
                   </button>
                 ))}
@@ -155,7 +156,7 @@ export default function VistaSintomas() {
                           : 'bg-white text-gray-700 border-gray-200 hover:border-pink-300'
                       }`}
                     >
-                      {item.label}
+                      {item.icon}{item.texto}
                     </button>
                   )
                 })}
@@ -207,13 +208,13 @@ export default function VistaSintomas() {
             {/* Avisos SOS */}
             {alarmaCritico && (
               <div className="bg-rose-50 border border-rose-200 text-rose-700 rounded-xl p-3 text-xs leading-relaxed font-semibold">
-                ⚠️ **Signo de Alarma detectado.** Has marcado síntomas de riesgo clínico. Si sientes dolor abdominal fuerte, sangrado vaginal o falta de movimientos fetales, presiona el botón SOS inmediatamente.
+                <AlertTriangle className="w-4 h-4 inline mr-1" /><strong>Signo de Alarma detectado.</strong> Has marcado síntomas de riesgo clínico. Si sientes dolor abdominal fuerte, sangrado vaginal o falta de movimientos fetales, presiona el botón SOS inmediatamente.
               </div>
             )}
 
             {successMsg && (
               <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl p-3 text-xs font-bold text-center">
-                ✓ {successMsg}
+                <Check className="w-3 h-3 inline mr-1" />{successMsg}
               </div>
             )}
 
@@ -228,11 +229,11 @@ export default function VistaSintomas() {
 
         {/* Historial de reportes */}
         <div className="lg:col-span-2 bg-white rounded-3xl p-6 border border-pink-100/50 shadow-sm flex flex-col gap-4">
-          <h3 className="font-bold text-gray-800 text-base">📅 Historial de Bienestar & Signos Registrados</h3>
+          <h3 className="font-bold text-gray-800 text-base flex items-center gap-2"><Calendar className="w-4 h-4 text-pink-400" /> Historial de Bienestar &amp; Signos Registrados</h3>
           
           {sintomasHistorial.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <span className="text-4xl mb-3">🩺</span>
+              <Stethoscope className="w-10 h-10 text-gray-300 mb-3" />
               <p className="text-gray-400 text-sm">Aún no has registrado tus síntomas diarios.</p>
             </div>
           ) : (
@@ -246,7 +247,7 @@ export default function VistaSintomas() {
                 >
                   <div className="flex justify-between items-center gap-2 flex-wrap">
                     <div className="flex items-center gap-2">
-                      <span className="text-xl">{getEmojiBienestar(s.bienestar || s.estado)}</span>
+                      {getIconBienestar(s.bienestar || s.estado)}
                       <span className="font-bold text-sm text-gray-700">Estado: {s.bienestar || s.estado || 'Bien'}</span>
                     </div>
                     
@@ -257,7 +258,7 @@ export default function VistaSintomas() {
 
                   {s.sintomas && (
                     <div className="text-xs bg-pink-50/50 text-pink-700 p-2 rounded-xl border border-pink-100/50 font-medium">
-                      🏷️ <strong>Síntomas reportados:</strong> {s.sintomas}
+                      <Tag className="w-3 h-3 inline mr-1" /><strong>Síntomas reportados:</strong> {s.sintomas}
                     </div>
                   )}
 
@@ -279,8 +280,8 @@ export default function VistaSintomas() {
                   )}
 
                   {s.esCritico && (
-                    <span className="text-[9px] font-bold bg-rose-100 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-full w-fit mt-1 uppercase animate-pulse">
-                      ⚠️ Clasificación: Riesgo Clínico Detectado
+                    <span className="text-[9px] font-bold bg-rose-100 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-full w-fit mt-1 uppercase animate-pulse flex items-center gap-1">
+                      <AlertTriangle className="w-2.5 h-2.5" /> Clasificación: Riesgo Clínico Detectado
                     </span>
                   )}
                 </div>

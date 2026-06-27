@@ -1,4 +1,5 @@
 import React from 'react'
+import { Heart, Baby, Lightbulb, BookOpen, Utensils, Activity, Brain } from 'lucide-react'
 
 export default function VistaEmbarazo() {
   const user = JSON.parse(localStorage.getItem('awki_user') || 'null')
@@ -46,7 +47,7 @@ export default function VistaEmbarazo() {
   return (
     <div className="flex flex-col gap-6 max-w-4xl mx-auto pb-12">
       <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-bold text-gray-800">🤰 Mi Embarazo Semana a Semana</h2>
+        <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2"><Heart className="w-6 h-6 text-pink-500" /> Mi Embarazo Semana a Semana</h2>
         <p className="text-gray-400 text-sm">Monitorea el crecimiento de tu bebé y recibe recomendaciones adaptadas a tu etapa gestacional.</p>
       </div>
 
@@ -100,7 +101,9 @@ export default function VistaEmbarazo() {
         {/* Desarrollo Fetal */}
         <div className="md:col-span-2 bg-white rounded-3xl p-6 border border-pink-100/50 shadow-sm flex flex-col gap-4">
           <div className="flex items-center gap-3">
-            <span className="text-4xl animate-pulse">👶</span>
+            <div className="w-12 h-12 rounded-2xl bg-pink-100 flex items-center justify-center animate-pulse">
+              <Baby className="w-7 h-7 text-pink-500" />
+            </div>
             <div>
               <h3 className="font-bold text-gray-800 text-base">Tu bebé esta semana</h3>
               <p className="text-xs text-pink-500 font-medium">Tamaño de {devInfo.size}</p>
@@ -115,7 +118,7 @@ export default function VistaEmbarazo() {
             
             <div className="bg-pink-50/30 border border-pink-100 rounded-2xl p-4 mt-2">
               <h4 className="text-xs font-bold text-pink-600 uppercase flex items-center gap-1.5">
-                💡 Consejo Prenatal Especial
+                <Lightbulb className="w-3.5 h-3.5" /> Consejo Prenatal Especial
               </h4>
               <p className="text-gray-600 text-sm leading-relaxed mt-1">{devInfo.tips}</p>
             </div>
@@ -126,15 +129,15 @@ export default function VistaEmbarazo() {
 
       {/* Artículos Recomendados */}
       <div className="bg-white rounded-3xl p-6 border border-pink-100/50 shadow-sm">
-        <h3 className="font-bold text-gray-800 mb-4 text-base">📘 Consejos y Cuidado Integral</h3>
+        <h3 className="font-bold text-gray-800 mb-4 text-base flex items-center gap-2"><BookOpen className="w-5 h-5 text-pink-400" /> Consejos y Cuidado Integral</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
-            { t: 'Nutrición del Embarazo', d: 'Consejos sobre hierro, ácido fólico, calcio y alimentos prohibidos durante la gestación.', e: '🍎' },
-            { t: 'Ejercicio Seguro', d: 'Prácticas recomendadas como yoga prenatal, caminatas y respiración abdominal.', e: '🧘‍♀️' },
-            { t: 'Salud Emocional', d: 'Cómo controlar el estrés de la gestante, conectar con la respiración y prepararse mentalmente.', e: '🧠' }
+            { t: 'Nutrición del Embarazo', d: 'Consejos sobre hierro, ácido fólico, calcio y alimentos prohibidos durante la gestación.', icon: <Utensils className="w-7 h-7 text-pink-400" /> },
+            { t: 'Ejercicio Seguro', d: 'Prácticas recomendadas como yoga prenatal, caminatas y respiración abdominal.', icon: <Activity className="w-7 h-7 text-pink-400" /> },
+            { t: 'Salud Emocional', d: 'Cómo controlar el estrés de la gestante, conectar con la respiración y prepararse mentalmente.', icon: <Brain className="w-7 h-7 text-pink-400" /> }
           ].map(art => (
             <div key={art.t} className="p-4 border border-gray-100 rounded-2xl hover:border-pink-200 transition-colors flex flex-col gap-2">
-              <span className="text-3xl">{art.e}</span>
+              <div className="w-12 h-12 rounded-2xl bg-pink-50 flex items-center justify-center">{art.icon}</div>
               <h4 className="font-bold text-gray-800 text-sm">{art.t}</h4>
               <p className="text-gray-500 text-xs leading-relaxed">{art.d}</p>
             </div>
