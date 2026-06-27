@@ -15,16 +15,40 @@ export default function AccionesRapidas() {
                 <p className="text-sm text-gray-500 mb-4">Elige cuándo te gustaría que sea tu próxima cita.</p>
                 <form className="flex flex-col gap-4">
                   <div>
-                    <label className="text-sm font-medium block mb-1">¿Qué día prefieres?</label>
-                    <input type="date" className="w-full border rounded-lg px-3 py-2 text-sm" />
+                    <label className="text-sm font-medium block mb-1">Tipo de cita</label>
+                    <select className="w-full border rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-pink-300">
+                      <option>Control Prenatal</option>
+                      <option>Ecografía</option>
+                      <option>Nutrición</option>
+                      <option>Psicología Perinatal</option>
+                    </select>
                   </div>
                   <div>
-                    <label className="text-sm font-medium block mb-1">¿Para qué es la cita? (opcional)</label>
-                    <textarea rows={2} placeholder="Ej: control mensual, dudas, ecografía..." className="w-full border rounded-lg px-3 py-2 text-sm resize-none" />
+                    <label className="text-sm font-medium block mb-1">Médico o Especialista</label>
+                    <select className="w-full border rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-pink-300">
+                      <option>Cualquier especialista disponible</option>
+                      <option>Dr. Mendoza (Obstetra)</option>
+                      <option>Dra. Rojas (Ginecóloga)</option>
+                      <option>Lic. Torres (Nutricionista)</option>
+                    </select>
+                  </div>
+                  <div className="flex gap-3">
+                    <div className="flex-1">
+                      <label className="text-sm font-medium block mb-1">Fecha</label>
+                      <input type="date" className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-pink-300" />
+                    </div>
+                    <div className="flex-1">
+                      <label className="text-sm font-medium block mb-1">Hora</label>
+                      <input type="time" className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-pink-300" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium block mb-1">Motivo o síntomas adicionales</label>
+                    <textarea rows={2} placeholder="Ej: control mensual, dolores ligeros..." className="w-full border rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-pink-300" />
                   </div>
                   <div className="flex justify-end gap-2 mt-1">
-                    <button type="button" onClick={() => setModalAbierto(null)} className="px-4 py-2 rounded-lg border text-sm">Cancelar</button>
-                    <button type="submit" className="px-4 py-2 rounded-lg bg-pink-600 text-white text-sm font-medium">Solicitar cita</button>
+                    <button type="button" onClick={() => setModalAbierto(null)} className="px-4 py-2 rounded-lg border text-sm hover:bg-gray-50 transition-colors">Cancelar</button>
+                    <button type="submit" className="px-4 py-2 rounded-lg bg-pink-600 text-white text-sm font-medium shadow-md hover:bg-pink-700 transition-colors">Confirmar cita</button>
                   </div>
                 </form>
               </div>
