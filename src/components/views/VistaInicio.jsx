@@ -212,22 +212,43 @@ function FormRegistroEmbarazo({ currentUser, onCreated }) {
 export default function VistaInicio({ currentUser, onPregnancyCreated }) {
   const [controles, setControles] = useState([])
   const [cargando, setCargando] = useState(false)
+  const [autoPesos, setAutoPesos] = useState([])
+  const [proximaCitaLocal, setProximaCitaLocal] = useState(null)
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
   const embarazoId = currentUser?.embarazoId ?? null
 
-  // Cargar controles obstétricos reales
+  const handleActionComplete = () => {
+    setRefreshTrigger(prev => prev + 1)
+  }
+
+  // Cargar controles obstétricos reales y datos locales
   useEffect(() => {
     if (!embarazoId) return
     setCargando(true)
+    
+    // 1. Obtener controles oficiales del backend
     api.get('/api/v1/controles', { embarazo_id: embarazoId })
       .then(data => {
         const list = Array.isArray(data) ? data : (data?.content ?? [])
-        // Ordenar por número de control de forma ascendente
         const sorted = [...list].sort((a, b) => a.numeroControl - b.numeroControl)
         setControles(sorted)
       })
       .catch(err => console.error("Error al obtener controles prenatales:", err))
       .finally(() => setCargando(false))
-  }, [embarazoId])
+
+    // 2. Obtener pesos auto-registrados de LocalStorage
+    const localPesos = JSON.parse(localStorage.getItem('awki_auto_pesos') || '[]')
+    setAutoPesos(localPesos)
+
+    // 3. Obtener citas agendadas locales
+    const localCitas = JSON.parse(localStorage.getItem('awki_citas_agendadas') || '[]')
+    const hoyStr = new Date().toISOString().split('T')[0]
+    const futuras = localCitas
+      .filter(c => !c.completado && c.fecha >= hoyStr)
+      .sort((a, b) => a.fecha.localeCompare(b.fecha) || a.hora.localeCompare(b.hora))
+    setProximaCitaLocal(futuras[0] ?? null)
+
+  }, [embarazoId, refreshTrigger])
 
   // Si el paciente no tiene un embarazo activo, mostrar el formulario de registro
   if (!embarazoId) {
@@ -269,12 +290,72 @@ export default function VistaInicio({ currentUser, onPregnancyCreated }) {
 
   // Procesar controles para la UI
   const ultimoControl = controles[controles.length - 1] ?? null
-  const pesoActual = ultimoControl ? `${ultimoControl.pesoKg} kg` : 'No registrado'
+  
+  // Obtener último peso (puede ser oficial o auto-registrado)
+  const ultimoAutoPeso = autoPesos[autoPesos.length - 1] ?? null
+  let pesoActual = 'No registrado'
+  if (ultimoControl && ultimoAutoPeso) {
+    pesoActual = ultimoControl.fechaControl >= ultimoAutoPeso.fechaControl
+      ? `${ultimoControl.pesoKg} kg`
+      : `${ultimoAutoPeso.pesoKg} kg`
+  } else if (ultimoControl) {
+    pesoActual = `${ultimoControl.pesoKg} kg`
+  } else if (ultimoAutoPeso) {
+    pesoActual = `${ultimoAutoPeso.pesoKg} kg`
+  }
+
   const presionActual = ultimoControl ? `${ultimoControl.presionArterial} mmHg` : 'No registrada'
   const hemoglobinaActual = ultimoControl ? `${ultimoControl.hemoglobinaGdl} g/dL` : 'No registrada'
 
-  const pesosList = controles.map(c => c.pesoKg)
-  const semanasList = controles.map(c => `Sem. ${c.semanasGestacion}`)
+  // Combinar y ordenar evolución del peso
+  const todosLosPesos = []
+  
+  // Agregar controles oficiales
+  controles.forEach(c => {
+    todosLosPesos.push({
+      pesoKg: c.pesoKg,
+      fecha: c.fechaControl,
+      label: `Sem. ${c.semanasGestacion}`
+    })
+  })
+
+  // Agregar auto-registros estimando semanas gestacionales
+  autoPesos.forEach(p => {
+    const diffDias = Math.round((new Date(p.fechaControl) - new Date()) / (24 * 60 * 60 * 1000))
+    const semEstimadas = Math.max(1, semanas + Math.round(diffDias / 7))
+    todosLosPesos.push({
+      pesoKg: p.pesoKg,
+      fecha: p.fechaControl,
+      label: `Sem. ${semEstimadas}`
+    })
+  })
+
+  // Ordenar cronológicamente por fecha
+  todosLosPesos.sort((a, b) => a.fecha.localeCompare(b.fecha))
+
+  const pesosList = todosLosPesos.map(x => x.pesoKg)
+  const semanasList = todosLosPesos.map(x => x.label)
+
+  // Consolidar Próxima Cita (Oficial vs Local)
+  let proximaCitaAVisualizar = null
+  let esCitaLocal = false
+
+  const citaOficial = ultimoControl?.proximaCita ?? null
+  const citaLocal = proximaCitaLocal?.fecha ?? null
+
+  if (citaOficial && citaLocal) {
+    if (citaOficial <= citaLocal) {
+      proximaCitaAVisualizar = { fecha: citaOficial, tipo: 'Control Prenatal', especialista: 'Médico Obstetra' }
+    } else {
+      proximaCitaAVisualizar = { fecha: citaLocal, tipo: proximaCitaLocal.tipo, especialista: proximaCitaLocal.especialista }
+      esCitaLocal = true
+    }
+  } else if (citaOficial) {
+    proximaCitaAVisualizar = { fecha: citaOficial, tipo: 'Control Prenatal', especialista: 'Médico Obstetra' }
+  } else if (citaLocal) {
+    proximaCitaAVisualizar = { fecha: citaLocal, tipo: proximaCitaLocal.tipo, especialista: proximaCitaLocal.especialista }
+    esCitaLocal = true
+  }
 
   // Generar checklist dinámico de controles obstétricos
   const checklist = [
@@ -339,7 +420,7 @@ export default function VistaInicio({ currentUser, onPregnancyCreated }) {
             </div>
 
             {/* Acciones Rápidas */}
-            <AccionesRapidas />
+            <AccionesRapidas onActionComplete={handleActionComplete} />
 
             {/* Resumen de Salud e Historial */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -389,20 +470,28 @@ export default function VistaInicio({ currentUser, onPregnancyCreated }) {
                   📅
                 </div>
               </div>
-              <p className="text-pink-600 font-semibold text-sm mb-3">Control prenatal programado</p>
+              <p className="text-pink-600 font-semibold text-sm mb-3">
+                {proximaCitaAVisualizar ? proximaCitaAVisualizar.tipo : 'Control prenatal programado'}
+              </p>
               <div className="flex flex-col gap-2 mb-4">
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-600 font-medium">Fecha:</span>
                   <span className="text-gray-800 text-xs font-bold">
-                    {ultimoControl?.proximaCita 
-                      ? new Date(ultimoControl.proximaCita + 'T00:00:00').toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' })
+                    {proximaCitaAVisualizar 
+                      ? new Date(proximaCitaAVisualizar.fecha + 'T00:00:00').toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' })
                       : 'No programada'}
                   </span>
                 </div>
+                {proximaCitaAVisualizar?.especialista && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-600 font-medium">Especialista:</span>
+                    <span className="text-gray-800 text-xs font-semibold">{proximaCitaAVisualizar.especialista}</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-600 font-medium">Estado:</span>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${ultimoControl?.proximaCita ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-gray-50 text-gray-400'}`}>
-                    {ultimoControl?.proximaCita ? 'Programado' : 'Sin fecha'}
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${proximaCitaAVisualizar ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-gray-50 text-gray-400'}`}>
+                    {proximaCitaAVisualizar ? (esCitaLocal ? 'Confirmada (Local)' : 'Programada (Médico)') : 'Sin fecha'}
                   </span>
                 </div>
               </div>

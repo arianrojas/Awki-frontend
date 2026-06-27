@@ -8,6 +8,11 @@ import DoctorDashboard from './components/views/DoctorDashboard'
 import VistaLogin from './components/views/VistaLogin'
 import VistaChat from './components/views/VistaChat'
 import VistaDocumentos from './components/views/VistaDocumentos'
+import VistaEmbarazo from './components/views/VistaEmbarazo'
+import VistaControlesCitas from './components/views/VistaControlesCitas'
+import VistaHistorial from './components/views/VistaHistorial'
+import VistaSintomas from './components/views/VistaSintomas'
+import VistaRecordatorios from './components/views/VistaRecordatorios'
 import BotonSos from './components/BotonSos'
 
 export default function App() {
@@ -96,11 +101,16 @@ export default function App() {
   }
 
   const renderView = () => {
-    if (activeTab === 'inicio')     return <VistaInicio currentUser={currentUser} onPregnancyCreated={handlePregnancyCreated} />
-    if (activeTab === 'mensajes')   return <VistaChat />
-    if (activeTab === 'perfil')     return <FormularioPaciente currentUser={currentUser} onVinculacionComplete={handleReloadEmbarazo} />
-    if (activeTab === 'ecografias') return <VistaDocumentos />
-    if (activeTab === 'doctor')     return <DoctorDashboard />
+    if (activeTab === 'inicio')        return <VistaInicio currentUser={currentUser} onPregnancyCreated={handlePregnancyCreated} />
+    if (activeTab === 'mensajes')      return <VistaChat />
+    if (activeTab === 'perfil')        return <FormularioPaciente currentUser={currentUser} onVinculacionComplete={handleReloadEmbarazo} />
+    if (activeTab === 'ecografias')    return <VistaDocumentos />
+    if (activeTab === 'embarazo')      return <VistaEmbarazo />
+    if (activeTab === 'controles')     return <VistaControlesCitas />
+    if (activeTab === 'historial')     return <VistaHistorial />
+    if (activeTab === 'sintomas')      return <VistaSintomas />
+    if (activeTab === 'recordatorios') return <VistaRecordatorios />
+    if (activeTab === 'doctor')        return <DoctorDashboard />
     return <VistaPendiente tab={activeTab} />
   }
 
