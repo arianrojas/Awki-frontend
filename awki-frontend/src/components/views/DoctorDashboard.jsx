@@ -137,7 +137,7 @@ export default function DoctorDashboard() {
   const cargarAlertasIniciales = async () => {
     try {
       const res = await api.get('/api/v1/alertas')
-      const noLeidas = (res?.content ?? res ?? []).filter(a => a.estadoEntrega === 'PENDIENTE')
+      const noLeidas = (res?.content ?? res ?? []).filter(a => !a.vistaPorMedico)
       setAlertas(noLeidas)
     } catch (err) {
       console.error('Error al precargar alertas:', err)
