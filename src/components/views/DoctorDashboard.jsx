@@ -1,22 +1,59 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { api } from '../../services/api'
+import { StompClient } from '../../services/WebSocketService'
+
+// Sirena sintética usando Web Audio API para notificaciones críticas
+function triggerSynthesizedAlarm() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)()
+    const osc1 = ctx.createOscillator()
+    const osc2 = ctx.createOscillator()
+    const gain = ctx.createGain()
+
+    osc1.connect(gain)
+    osc2.connect(gain)
+    gain.connect(ctx.destination)
+
+    osc1.type = 'sawtooth'
+    osc1.frequency.setValueAtTime(660, ctx.currentTime) // Tono bajo de sirena
+    
+    osc2.type = 'sine'
+    osc2.frequency.setValueAtTime(880, ctx.currentTime) // Tono alto de sirena
+
+    gain.gain.setValueAtTime(0.2, ctx.currentTime)
+
+    osc1.start()
+    osc2.start()
+
+    setTimeout(() => {
+      osc1.stop()
+      osc2.stop()
+      ctx.close()
+    }, 800)
+  } catch (e) {
+    console.error("Web Audio API falló:", e)
+  }
+}
 
 export default function DoctorDashboard() {
   const [vinculos, setVinculos] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
   
-  // Modales
-  const [showCitaModal, setShowCitaModal] = useState(false)
+  // Modales y formularios
   const [showVincularModal, setShowVincularModal] = useState(false)
   const [showControlModal, setShowControlModal] = useState(false)
-  
-  // Datos temporales de vinculación y alertas
   const [codigoGenerado, setCodigoGenerado] = useState(null)
   const [codigoIngresado, setCodigoIngresado] = useState('')
   const [pacienteSeleccionada, setPacienteSeleccionada] = useState(null)
   
-  // Formulario de Control Prenatal
+  // Estados de Emergencias y WebSocket
+  const [alertas, setAlertas] = useState([])
+  const [wsStatus, setWsStatus] = useState('disconnected') // connected, disconnected, error, polling
+  const [alarmaSonando, setAlarmaSonando] = useState(false)
+  const alarmIntervalRef = useRef(null)
+  const socketRef = useRef(null)
+
   const [controlForm, setControlForm] = useState({
     fechaControl: new Date().toISOString().split('T')[0],
     semanasGestacion: 20,
@@ -38,15 +75,12 @@ export default function DoctorDashboard() {
     contracciones: false
   })
 
-  // Cargar datos
+  // Cargar directorio de pacientes
   const cargarDirectorio = async () => {
     setCargando(true)
     setError(null)
     try {
-      // 1. Obtener vínculos activos del médico
       const listaVinculos = await api.get('/api/v1/vinculacion/mis-vinculos')
-      
-      // 2. Cargar detalles de embarazo para cada paciente vinculada
       const listaConDetalles = await Promise.all(
         listaVinculos.map(async (v) => {
           try {
@@ -66,15 +100,164 @@ export default function DoctorDashboard() {
         })
       )
       setVinculos(listaConDetalles)
+      return listaConDetalles
     } catch (err) {
       setError(err.message ?? 'No se pudo cargar el directorio de pacientes')
+      return []
     } finally {
       setCargando(false)
     }
   }
 
+  // Cargar lista inicial de alertas no leídas de la base de datos
+  const cargarAlertasIniciales = async () => {
+    try {
+      const res = await api.get('/api/v1/alertas')
+      // Filtrar sólo las que están en estado PENDIENTE o no leídas
+      const noLeidas = (res?.content ?? res ?? []).filter(a => a.estadoEntrega === 'PENDIENTE')
+      setAlertas(noLeidas)
+    } catch (err) {
+      console.error("Error al precargar alertas:", err)
+    }
+  }
+
+  // Marcar una alerta como leída (REST API)
+  const handleMarcarLeida = async (alertaId) => {
+    try {
+      await api.patch(`/api/v1/alertas/${alertaId}/marcar-leida`)
+      setAlertas(prev => prev.filter(a => a.id !== alertaId))
+      
+      // Detener alarma si no quedan alertas de alto riesgo
+      const restantesRojas = alertas.filter(a => a.id !== alertaId && (a.nivelUrgencia === 'ROJO' || a.nivelUrgencia === 'ALTO'))
+      if (restantesRojas.length === 0) {
+        handleSilenciarAlarma()
+      }
+    } catch (err) {
+      console.error("Error al marcar alerta como leída:", err)
+    }
+  }
+
+  // Activar pitido de sirena repetitivo
+  const iniciarAlarmaSonora = () => {
+    if (alarmaSonando) return
+    setAlarmaSonando(true)
+    triggerSynthesizedAlarm() // Primer pitido inmediato
+    alarmIntervalRef.current = setInterval(() => {
+      triggerSynthesizedAlarm()
+    }, 1500)
+  }
+
+  // Silenciar alarma sonora manualmente
+  const handleSilenciarAlarma = () => {
+    setAlarmaSonando(false)
+    if (alarmIntervalRef.current) {
+      clearInterval(alarmIntervalRef.current)
+      alarmIntervalRef.current = null
+    }
+  }
+
+  // WebSocket y Polling de Resiliencia
   useEffect(() => {
-    cargarDirectorio()
+    let pollingInterval = null
+    const token = localStorage.getItem('awki_token')
+    const user = JSON.parse(localStorage.getItem('awki_user') || 'null')
+
+    // Inicializar datos del directorio y alertas
+    cargarAlertasIniciales()
+    
+    // Resolver medicoId del usuario logueado
+    cargarDirectorio().then((vinculosActuales) => {
+      const medicoId = user?.medicoId ?? vinculosActuales[0]?.medicoId
+
+      if (!token || !medicoId) {
+        console.warn("No se pudo iniciar WebSocket: Token o MedicoId ausentes.")
+        setWsStatus('polling')
+        return
+      }
+
+      // Conexión del cliente STOMP
+      const wsUrl = 'ws://localhost:8080/ws'
+      const client = new StompClient(
+        wsUrl,
+        token,
+        // OnConnect
+        () => {
+          setWsStatus('connected')
+          console.log("WebSocket conectado al broker STOMP.")
+          // Detener polling si estaba activo
+          if (pollingInterval) {
+            clearInterval(pollingInterval)
+            pollingInterval = null
+          }
+        },
+        // OnMessage
+        (destination, payload) => {
+          console.log("Mensaje de tiempo real recibido:", destination, payload)
+          if (destination.includes('/alertas')) {
+            // Nueva alerta roja / SOS
+            setAlertas(prev => {
+              // Evitar duplicados
+              if (prev.some(a => a.id === payload.id)) return prev
+              return [payload, ...prev]
+            })
+            // Disparar alarma si es SOS (ROJO/ALTO)
+            if (payload.nivelUrgencia === 'ROJO' || payload.nivelUrgencia === 'ALTO') {
+              iniciarAlarmaSonora()
+            }
+          } else if (destination.includes('/riesgo')) {
+            // Actualizar nivel de riesgo en la UI en tiempo real
+            setVinculos(prev => prev.map(p => {
+              if (p.embarazo && p.embarazo.id === payload.embarazoId) {
+                return {
+                  ...p,
+                  embarazo: { ...p.embarazo, nivelRiesgoActual: payload.nivelRiesgoNuevo }
+                }
+              }
+              return p
+            }))
+          }
+        },
+        // OnError
+        (err) => {
+          console.error("Error en conexión WebSocket:", err)
+          setWsStatus('error')
+        },
+        // OnDisconnect
+        () => {
+          setWsStatus('disconnected')
+          console.warn("WebSocket desconectado. Iniciando fallback de Polling...")
+          
+          // Iniciar polling de respaldo cada 15 segundos (Nivel 2 de resiliencia del WebSocket)
+          if (!pollingInterval) {
+            setWsStatus('polling')
+            pollingInterval = setInterval(() => {
+              console.log("Ejecutando Polling de resiliencia obstétrica...")
+              cargarAlertasIniciales()
+              cargarDirectorio()
+            }, 15000)
+          }
+        }
+      )
+
+      client.connect()
+      socketRef.current = client
+
+      // Suscribirse a los tópicos específicos de este médico
+      client.subscribe('sub-alertas', `/topic/medico/${medicoId}/alertas`)
+      client.subscribe('sub-riesgo', `/topic/medico/${medicoId}/riesgo`)
+    })
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect()
+      }
+      if (pollingInterval) {
+        clearInterval(pollingInterval)
+      }
+      if (alarmIntervalRef.current) {
+        clearInterval(alarmIntervalRef.current)
+      }
+    }
   }, [])
 
   // Generar código de vinculación (Médico -> Paciente)
@@ -168,7 +351,88 @@ export default function DoctorDashboard() {
   return (
     <div className="animate-fade-in max-w-6xl mx-auto flex flex-col gap-6 p-4">
       
-      {/* Banner Principal */}
+      {/* Banner de Estado de Conexión en Tiempo Real (Resiliencia) */}
+      <div className="flex justify-between items-center bg-white rounded-2xl px-6 py-4 shadow-sm border border-gray-100">
+        <div className="flex items-center gap-3">
+          <span className="text-xl">📡</span>
+          <div>
+            <h4 className="font-bold text-gray-800 text-sm">Estado de Monitoreo Prenatal</h4>
+            <p className="text-gray-400 text-xs mt-0.5">Conectado a la central de emergencias obstétricas.</p>
+          </div>
+        </div>
+        <div>
+          {wsStatus === 'connected' && (
+            <span className="bg-green-50 text-green-600 border border-green-200 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-ping" />
+              Tiempo Real Activo
+            </span>
+          )}
+          {wsStatus === 'polling' && (
+            <span className="bg-amber-50 text-amber-600 border border-amber-200 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide flex items-center gap-1.5">
+              ⚠️ Modo Polling (Resiliencia 15s)
+            </span>
+          )}
+          {(wsStatus === 'disconnected' || wsStatus === 'error') && (
+            <span className="bg-red-50 text-red-600 border border-red-200 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide flex items-center gap-1.5">
+              ❌ Reconectando WebSocket...
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Alertas Críticas (SOS / Síntomas graves en tiempo real) */}
+      {alertas.length > 0 && (
+        <div className="bg-red-50/50 border-2 border-red-200 rounded-3xl p-6 shadow-md flex flex-col gap-4 animate-pulse-slow">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2.5">
+              <span className="text-2xl">🚨</span>
+              <div>
+                <h2 className="text-lg font-black text-red-700">Emergencia Obstétrica en Curso</h2>
+                <p className="text-red-500 text-xs">Se requiere revisión clínica e intervención inmediata.</p>
+              </div>
+            </div>
+            {alarmaSonando && (
+              <button
+                onClick={handleSilenciarAlarma}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow-lg transition-all"
+              >
+                🔕 Silenciar Alarma
+              </button>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-3">
+            {alertas.map((a) => (
+              <div key={a.id} className="bg-white border border-red-100 rounded-2xl p-4 flex justify-between items-center shadow-sm">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="bg-red-100 text-red-700 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase">
+                      {a.nivelUrgencia}
+                    </span>
+                    <span className="text-gray-400 text-[10px]">
+                      {new Date(a.createdAt).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                    </span>
+                  </div>
+                  <p className="font-bold text-gray-800 text-sm mt-1.5">
+                    Paciente: {a.paciente?.nombres} {a.paciente?.apellidos} (DNI: {a.paciente?.dni ?? 'No registrado'})
+                  </p>
+                  <p className="text-gray-500 text-xs mt-1 leading-relaxed">
+                    Detalle: <span className="font-semibold text-gray-700">{a.descripcion}</span>
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleMarcarLeida(a.id)}
+                  className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-green-600 bg-gray-50 hover:bg-green-50 rounded-xl transition-all border border-gray-100"
+                >
+                  ✓ Atendida (Marcar Leída)
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Banner Principal del Médico */}
       <div className="bg-white rounded-3xl p-8 shadow-sm border border-blue-50 relative overflow-hidden">
         <div className="absolute -top-20 -right-20 w-64 h-64 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-full opacity-60" />
         <div className="relative">
@@ -275,11 +539,11 @@ export default function DoctorDashboard() {
               </thead>
               <tbody>
                 {vinculos.map((p) => {
-                  const riesgo = p.embarazo?.nivelRiesgoActual ?? 'DESCONOCIDO'
+                  const riesgo = p.embarazo?.nivelRiesgoActual ?? 'VERDE'
                   const semanas = p.embarazo?.semanasGestacionActuales ?? null
                   
                   const badgeColor = 
-                    riesgo === 'ROJO' ? 'bg-red-50 text-red-600 border-red-100' :
+                    riesgo === 'ROJO' ? 'bg-red-50 text-red-600 border-red-100 animate-pulse' :
                     riesgo === 'AMARILLO' ? 'bg-amber-50 text-amber-600 border-amber-100' :
                     riesgo === 'VERDE' ? 'bg-green-50 text-green-600 border-green-100' :
                     'bg-gray-50 text-gray-400 border-gray-100'

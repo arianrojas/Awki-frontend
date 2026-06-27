@@ -7,6 +7,7 @@ import FormularioPaciente from './components/views/FormularioPaciente'
 import DoctorDashboard from './components/views/DoctorDashboard'
 import VistaLogin from './components/views/VistaLogin'
 import VistaChat from './components/views/VistaChat'
+import BotonSos from './components/BotonSos'
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('inicio')
@@ -110,6 +111,7 @@ export default function App() {
           {renderView()}
         </main>
       </div>
+      <BotonSos currentUser={currentUser} />
     </div>
   )
 }
