@@ -2,7 +2,7 @@ import React from 'react'
 
 export default function Header({ activeTab }) {
   const greetings = {
-    inicio: { title: '¡Hola, María Fernanda!', subtitle: 'Estás en tu viaje más importante. Estamos contigo.', image: '/inicio.png' },
+    inicio: { title: '¡Hola, María Fernanda!', subtitle: 'Estás en tu viaje más importante. Estamos contigo.', image: '/ola.png' },
     embarazo: { title: 'Mi Embarazo', subtitle: 'Sigue el progreso de tu bebé semana a semana.', image: '/embarazo.png' },
     controles: { title: 'Controles y Citas', subtitle: 'Gestiona tus citas prenatales con facilidad.', image: '/calendario.png' },
     historial: { title: 'Historial Médico', subtitle: 'Tu historial clínico completo en un solo lugar.', image: '/historial.png' },
