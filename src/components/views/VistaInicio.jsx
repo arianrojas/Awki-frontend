@@ -291,11 +291,20 @@ export default function VistaInicio({ currentUser, onPregnancyCreated }) {
   // Procesar controles para la UI
   const ultimoControl = controles[controles.length - 1] ?? null
   
-  // Obtener último peso (puede ser oficial o auto-registrado)
-  const ultimoAutoPeso = autoPesos[autoPesos.length - 1] ?? null
+  // Obtener último peso — con fallback seguro ante campos legacy
+  const normalizarAutoPeso = (p) => ({
+    pesoKg: p.pesoKg ?? p.peso ?? null,
+    fechaControl: p.fechaControl ?? p.fecha ?? null,
+    semanasGestacion: p.semanasGestacion ?? 0,
+  })
+  const autoPesosNorm = autoPesos.map(normalizarAutoPeso).filter(p => p.pesoKg != null)
+  const ultimoAutoPeso = autoPesosNorm[autoPesosNorm.length - 1] ?? null
+
   let pesoActual = 'No registrado'
   if (ultimoControl && ultimoAutoPeso) {
-    pesoActual = ultimoControl.fechaControl >= ultimoAutoPeso.fechaControl
+    const fechaCtrl = ultimoControl.fechaControl ?? ''
+    const fechaAuto = ultimoAutoPeso.fechaControl ?? ''
+    pesoActual = fechaCtrl >= fechaAuto
       ? `${ultimoControl.pesoKg} kg`
       : `${ultimoAutoPeso.pesoKg} kg`
   } else if (ultimoControl) {
@@ -312,15 +321,18 @@ export default function VistaInicio({ currentUser, onPregnancyCreated }) {
   
   // Agregar controles oficiales
   controles.forEach(c => {
-    todosLosPesos.push({
-      pesoKg: c.pesoKg,
-      fecha: c.fechaControl,
-      label: `Sem. ${c.semanasGestacion}`
-    })
+    if (c.pesoKg != null && c.fechaControl) {
+      todosLosPesos.push({
+        pesoKg: c.pesoKg,
+        fecha: c.fechaControl,
+        label: `Sem. ${c.semanasGestacion}`
+      })
+    }
   })
 
   // Agregar auto-registros estimando semanas gestacionales
-  autoPesos.forEach(p => {
+  autoPesosNorm.forEach(p => {
+    if (!p.fechaControl) return
     const diffDias = Math.round((new Date(p.fechaControl) - new Date()) / (24 * 60 * 60 * 1000))
     const semEstimadas = Math.max(1, semanas + Math.round(diffDias / 7))
     todosLosPesos.push({
@@ -330,8 +342,8 @@ export default function VistaInicio({ currentUser, onPregnancyCreated }) {
     })
   })
 
-  // Ordenar cronológicamente por fecha
-  todosLosPesos.sort((a, b) => a.fecha.localeCompare(b.fecha))
+  // Ordenar cronológicamente por fecha (defensivo ante nulos)
+  todosLosPesos.sort((a, b) => (a.fecha ?? '').localeCompare(b.fecha ?? ''))
 
   const pesosList = todosLosPesos.map(x => x.pesoKg)
   const semanasList = todosLosPesos.map(x => x.label)
