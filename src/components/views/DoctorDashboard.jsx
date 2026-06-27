@@ -4,9 +4,9 @@ import { createPortal } from 'react-dom'
 export default function DoctorDashboard() {
   const [showModal, setShowModal] = useState(false)
   const stats = [
-    { label: 'Pacientes Activas', value: '142', icon: '👥', color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
-    { label: 'Citas Hoy', value: '8', icon: '📅', color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100' },
-    { label: 'Alertas', value: '3', icon: '⚠️', color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
+    { label: 'Pacientes Activas', value: '142', icon: <img src="/paciente.png" alt="logo_persona" className='w-full h-full object-cover'></img>, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
+    { label: 'Citas Hoy', value: '8', icon: <img src="/calendario.png" alt="logo_calendario" className='w-full h-full object-cover'></img>, color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100' },
+    { label: 'Alertas', value: '3', icon: <img src="/crisis.png" alt="logo_alerta" className='w-full h-full object-cover'></img>, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
   ]
 
   const upcomingAppointments = [

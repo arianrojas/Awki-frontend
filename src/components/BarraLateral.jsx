@@ -10,7 +10,7 @@ const navItems = [
   { id: 'educacion', icon: <img src="/educacion.png" alt="logo_educacion" className='w-full h-full object-cover'></img>, label: 'Educación' },
   { id: 'recordatorios', icon: <img src="/notificacion.png" alt="logo_notificacion" className='w-full h-full object-cover'></img>, label: 'Recordatorios' },
   { id: 'mensajes', icon: <img src="/mensaje.png" alt="logo_mensaje" className='w-full h-full object-cover'></img>, label: 'Mensajes' },
-  { id: 'doctor', icon: <span className="text-lg leading-none">👨‍⚕️</span>, label: 'Panel Médico (Demo)' },
+  { id: 'doctor', icon: <img src="/doctor_barralateral.png" alt="logo_doctorr" className='w-full h-full object-cover'></img>, label: 'Panel Médico' },
 ]
 
 export default function BarraLateral({ activeTab, setActiveTab }) {
