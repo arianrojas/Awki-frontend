@@ -16,6 +16,71 @@ export default function VistaDocumentos({ embarazoId: propEmbarazoId, isDoctor =
   const [subiendo, setSubiendo] = useState(false)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
+  const [generandoEpicrisis, setGenerandoEpicrisis] = useState(false)
+
+  const handleGenerarEpicrisis = async () => {
+    if (!embarazoId) return
+    if (!window.confirm('¿Desea generar el documento PDF de Epicrisis para este embarazo?')) return
+    setGenerandoEpicrisis(true)
+    setError(null)
+    setSuccess(null)
+
+    try {
+      const resp = await api.post('/api/v1/epicrisis/generar', {
+        embarazoId,
+        motivoDerivacion: 'Alta regular / Control / Cierre de Expediente',
+        observacionesAdicionales: 'Documento generado automáticamente desde el sistema Awki.'
+      })
+      
+      const jobId = resp?.id || resp?.jobId // Dependiendo de EpicrisisJobResponse
+      if (!jobId) throw new Error("No se obtuvo Job ID")
+      
+      // Polling
+      let successStatus = false
+      let epicrisisId = null
+      for (let i = 0; i < 15; i++) {
+        await new Promise(r => setTimeout(r, 2000))
+        const statusResp = await api.get(`/api/v1/epicrisis/estado/${jobId}`)
+        if (statusResp.estado === 'COMPLETADO') {
+          successStatus = true
+          epicrisisId = statusResp.epicrisisId
+          break
+        }
+        if (statusResp.estado === 'FALLIDO') {
+          throw new Error("La generación falló en el servidor.")
+        }
+      }
+
+      if (!successStatus) {
+        throw new Error("Tiempo de espera agotado generando Epicrisis.")
+      }
+
+      // Descargar PDF
+      const token = localStorage.getItem('awki_token')
+      const baseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:8080'
+      const pdfResp = await fetch(`${baseUrl}/api/v1/epicrisis/${epicrisisId}/descargar`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+
+      if (!pdfResp.ok) throw new Error("Error al descargar el PDF generado")
+
+      const blob = await pdfResp.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `Epicrisis_${epicrisisId}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(url)
+
+      setSuccess('Epicrisis generada y descargada con éxito.')
+    } catch (err) {
+      setError(err.message || 'Error al generar Epicrisis')
+    } finally {
+      setGenerandoEpicrisis(false)
+    }
+  }
 
   // Estados del Formulario de subida
   const [archivo, setArchivo] = useState(null)
@@ -226,11 +291,23 @@ export default function VistaDocumentos({ embarazoId: propEmbarazoId, isDoctor =
 
         {/* Listado de Documentos */}
         <div className="lg:col-span-2 bg-white rounded-3xl p-6 border border-pink-100/50 shadow-sm flex flex-col gap-4">
-          <h3 className="font-bold text-gray-700 text-base flex items-center gap-2">
-            <FolderOpen className="w-4 h-4 text-pink-400" /> Documentos Almacenados
-            <span className="text-xs font-medium bg-pink-100 text-pink-600 px-2.5 py-0.5 rounded-full">
-              {documentos.length} total
-            </span>
+          <h3 className="font-bold text-gray-700 text-base flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <FolderOpen className="w-4 h-4 text-pink-400" /> Documentos Almacenados
+              <span className="text-xs font-medium bg-pink-100 text-pink-600 px-2.5 py-0.5 rounded-full">
+                {documentos.length} total
+              </span>
+            </div>
+            {isDoctor && (
+              <button
+                onClick={handleGenerarEpicrisis}
+                disabled={generandoEpicrisis}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg text-xs font-bold hover:from-purple-600 hover:to-indigo-700 shadow-sm disabled:opacity-50"
+              >
+                <FileText className="w-3.5 h-3.5" />
+                {generandoEpicrisis ? 'Generando...' : 'Generar Epicrisis (Alta)'}
+              </button>
+            )}
           </h3>
 
           {cargando ? (

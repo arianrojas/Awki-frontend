@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { api } from '../../services/api'
 import { Stethoscope, PenLine, Calendar, Tag, AlertTriangle, Check, Frown, Bandage, Eye, Bell, Droplets, Droplet, Flame, Zap, Smile, Meh, Moon, Star } from 'lucide-react'
 
 const SINTOMAS_CLINICOS = [
@@ -24,10 +25,18 @@ export default function VistaSintomas() {
   const [alarmaCritico, setAlarmaCritico] = useState(false)
   const [successMsg, setSuccessMsg] = useState(null)
 
-  const cargarSintomas = () => {
-    const data = JSON.parse(localStorage.getItem('awki_diario_sintomas') || '[]')
-    const ordenados = [...data].sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
-    setSintomasHistorial(ordenados)
+  const user = JSON.parse(localStorage.getItem('awki_user') || 'null')
+  const embarazoId = user?.embarazoId ?? null
+
+  const cargarSintomas = async () => {
+    if (!embarazoId) return
+    try {
+      const data = await api.get(`/api/v1/riesgo/reportes-diarios/${embarazoId}`)
+      const ordenados = data.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+      setSintomasHistorial(ordenados)
+    } catch (error) {
+      console.error("Error cargando el historial de síntomas:", error)
+    }
   }
 
   useEffect(() => {
@@ -38,7 +47,6 @@ export default function VistaSintomas() {
     setSintomasSeleccionados(prev => {
       const updated = prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
       
-      // Verificar si hay síntomas de alarma seleccionados
       const tieneAlarma = updated.some(sId => {
         const item = SINTOMAS_CLINICOS.find(c => c.id === sId)
         return item && item.tipo === 'ALARMA'
@@ -48,49 +56,55 @@ export default function VistaSintomas() {
     })
   }
 
-  const handleGuardar = (e) => {
+  const handleGuardar = async (e) => {
     e.preventDefault()
-    
-    const tieneAlarmaSeleccionada = sintomasSeleccionados.some(sId => {
-      const item = SINTOMAS_CLINICOS.find(c => c.id === sId)
-      return item && item.tipo === 'ALARMA'
-    })
-
-    const esCritico = alarmaCritico || tieneAlarmaSeleccionada ||
-      movimientos === 'No los he sentido' ||
-      hinchazon === 'Sí, en la cara' ||
-      hinchazon === 'Sí, en varias partes del cuerpo'
-
-    const nombresSintomas = sintomasSeleccionados.map(sId => {
-      const item = SINTOMAS_CLINICOS.find(c => c.id === sId)
-      return item ? item.texto : sId
-    })
-
-    const lista = JSON.parse(localStorage.getItem('awki_diario_sintomas') || '[]')
-    const nuevoReporte = {
-      id: `sintoma-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-      bienestar: bienestarDia,
-      movimientos,
-      hinchazon,
-      sintomas: nombresSintomas.join(', '),
-      detalles,
-      esCritico,
-      fecha: new Date().toISOString()
+    if (!embarazoId) {
+      alert("No se encontró un embarazo activo para registrar síntomas.")
+      return
     }
 
-    lista.push(nuevoReporte)
-    localStorage.setItem('awki_diario_sintomas', JSON.stringify(lista))
-    
-    setSuccessMsg('Reporte clínico de síntomas guardado y sincronizado.')
-    setDetalles('')
-    setSintomasSeleccionados([])
-    setAlarmaCritico(false)
-    setMovimientos('Normales, como siempre')
-    setHinchazon('No, ninguna')
-    setBienestarDia('Excelente')
+    const mapeoSintomas = {
+      cefalea: 'CEFALEA',
+      vision_borrosa: 'VISION_BORROSA',
+      tinnitus: 'TINNITUS',
+      epigastralgia: 'EPIGASTRALGIA',
+      sangrado: 'SANGRADO_VAGINAL',
+      liquido: 'PERDIDA_LIQUIDO_AMNIOTICO',
+      ardor_orinar: 'ARDOR_ORINAR'
+    }
 
-    setTimeout(() => setSuccessMsg(null), 3500)
-    cargarSintomas()
+    const sintomasClinicosAEnviar = sintomasSeleccionados
+      .map(id => mapeoSintomas[id])
+      .filter(Boolean)
+
+    if (movimientos === 'No los he sentido') {
+      sintomasClinicosAEnviar.push('AUSENCIA_MOVIMIENTOS_FETALES')
+    }
+
+    try {
+      await api.post('/api/v1/riesgo/reportes-diarios', {
+        embarazoId,
+        bienestar: bienestarDia,
+        movimientos,
+        hinchazon,
+        sintomasDetalle: detalles,
+        notas: '',
+        sintomasClinicos: sintomasClinicosAEnviar
+      })
+
+      setSuccessMsg('Reporte clínico de síntomas guardado en el servidor.')
+      setDetalles('')
+      setSintomasSeleccionados([])
+      setAlarmaCritico(false)
+      setMovimientos('Normales, como siempre')
+      setHinchazon('No, ninguna')
+      setBienestarDia('Excelente')
+
+      setTimeout(() => setSuccessMsg(null), 3500)
+      cargarSintomas()
+    } catch (error) {
+      alert("Error al guardar reporte de síntomas: " + error.message)
+    }
   }
 
   const getIconBienestar = (b) => {
@@ -263,9 +277,9 @@ export default function VistaSintomas() {
                     </span>
                   </div>
 
-                  {s.sintomas && (
+                  {(s.sintomasClinicos?.length > 0 || s.sintomas) && (
                     <div className="text-sm bg-pink-50/50 text-pink-700 p-2 rounded-xl border border-pink-100/50 font-medium">
-                      <Tag className="w-3 h-3 inline mr-1" /><strong>Síntomas reportados:</strong> {s.sintomas}
+                      <Tag className="w-3 h-3 inline mr-1" /><strong>Síntomas reportados:</strong> {s.sintomas || s.sintomasClinicos.join(', ')}
                     </div>
                   )}
 
@@ -280,9 +294,9 @@ export default function VistaSintomas() {
                     </div>
                   </div>
 
-                  {s.detalles && (
+                  {(s.detalles || s.sintomasDetalle) && (
                     <div className="mt-1 text-sm bg-gray-50 p-2.5 rounded-xl text-gray-600 leading-relaxed italic border border-gray-100">
-                      "{s.detalles}"
+                      "{s.detalles || s.sintomasDetalle}"
                     </div>
                   )}
 

@@ -789,6 +789,13 @@ export default function DoctorDashboard() {
                         <p style={{ color: '#64748b', fontSize: '0.82rem', margin: 0 }}>
                           {a.descripcion}
                         </p>
+                        {a.latitud && a.longitud && (
+                          <div style={{ marginTop: '0.5rem' }}>
+                            <a href={`https://www.google.com/maps/search/?api=1&query=${a.latitud},${a.longitud}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', fontWeight: 700, color: '#2563eb', background: '#eff6ff', padding: '0.3rem 0.6rem', borderRadius: '0.5rem', textDecoration: 'none', border: '1px solid #bfdbfe' }}>
+                              📍 Ver ubicación en Google Maps
+                            </a>
+                          </div>
+                        )}
                       </div>
                       <button
                         onClick={() => handleMarcarLeida(a.id)}
