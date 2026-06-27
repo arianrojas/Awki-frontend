@@ -37,12 +37,20 @@ function MensajeBurbuja({ msg }) {
 
       <div className={`max-w-[75%] flex flex-col gap-1 ${esPaciente ? 'items-end' : 'items-start'}`}>
         {/* Bubble */}
-        <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${
+        <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm whitespace-pre-line ${
           esPaciente
             ? 'bg-gradient-to-br from-pink-500 to-purple-600 text-white rounded-tr-sm'
             : 'bg-white text-gray-700 border border-gray-100 rounded-tl-sm'
         }`}>
-          {msg.contenido}
+          {msg.contenido.split('\n').map((line, idx) => {
+            const formattedLine = line
+              .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+              .replace(/^\*\s+/, '• ')
+              .replace(/\*/g, '')
+            return (
+              <span key={idx} dangerouslySetInnerHTML={{ __html: formattedLine + (idx < msg.contenido.split('\n').length - 1 ? '<br/>' : '') }} />
+            )
+          })}
         </div>
 
         {/* Badges + timestamp */}
@@ -330,7 +338,7 @@ export default function VistaChat() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#f9f5ff] rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+    <div className="flex flex-col h-[calc(100vh-140px)] bg-[#f9f5ff] rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
 
       {/* ── Header ── */}
       <div className="bg-white border-b border-gray-100 px-5 py-3 flex items-center gap-3 flex-shrink-0">

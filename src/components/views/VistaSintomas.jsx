@@ -182,9 +182,9 @@ export default function VistaSintomas() {
             </div>
           ) : (
             <div className="flex flex-col gap-3.5 max-h-[480px] overflow-y-auto pr-1">
-              {sintomasHistorial.map((s) => (
+              {sintomasHistorial.map((s, index) => (
                 <div
-                  key={s.id}
+                  key={s.id || s.fecha || index}
                   className={`p-4 border rounded-2xl flex flex-col gap-2 transition-all hover:bg-gray-50/50
                     ${s.esCritico ? 'border-red-200 bg-red-50/10' : 'border-gray-100'}
                   `}

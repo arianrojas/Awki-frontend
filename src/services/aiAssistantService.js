@@ -67,6 +67,7 @@ export const aiAssistantService = {
       }
 
       actionData = {
+        id: `sintoma-${Date.now()}-${Math.random()}`,
         fecha: new Date().toISOString().split('T')[0],
         estado: nivel,
         sintomas: listSintomas.join(', '),
