@@ -246,8 +246,8 @@ export default function VistaSintomas() {
                 >
                   <div className="flex justify-between items-center gap-2 flex-wrap">
                     <div className="flex items-center gap-2">
-                      <span className="text-xl">{getEmojiBienestar(s.bienestar)}</span>
-                      <span className="font-bold text-sm text-gray-700">Estado: {s.bienestar}</span>
+                      <span className="text-xl">{getEmojiBienestar(s.bienestar || s.estado)}</span>
+                      <span className="font-bold text-sm text-gray-700">Estado: {s.bienestar || s.estado || 'Bien'}</span>
                     </div>
                     
                     <span className="text-[10px] text-gray-400 font-bold">

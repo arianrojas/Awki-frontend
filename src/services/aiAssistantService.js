@@ -50,36 +50,78 @@ export const aiAssistantService = {
     const cleanInput = userInput.toLowerCase()
 
     // ── INTENCIÓN A: Registrar o Modificar Síntomas ──────────────────────────────
-    if (cleanInput.includes('siento') || cleanInput.includes('tengo') || cleanInput.includes('dolor') || cleanInput.includes('náusea') || cleanInput.includes('mareo') || cleanInput.includes('hinchad')) {
+    if (cleanInput.includes('siento') || cleanInput.includes('tengo') || cleanInput.includes('dolor') || cleanInput.includes('náusea') || cleanInput.includes('nausea') || cleanInput.includes('mareo') || cleanInput.includes('hinchad') || cleanInput.includes('registra') || cleanInput.includes('síntoma') || cleanInput.includes('sintoma')) {
       detectedAction = 'UPDATE_SYMPTOMS'
-      let nivel = 'Bien'
+      let nivelBienestar = 'Bien'
       let listSintomas = []
+      let esCritico = false
+      let hinchazonDetalle = 'No, ninguna'
+      let movimientosDetalle = 'Normales, como siempre'
 
-      if (cleanInput.includes('sangrado') || cleanInput.includes('fiebre') || cleanInput.includes('fuerte dolor')) {
-        nivel = 'Mal'
-        listSintomas.push('Síntomas de alarma detectados')
-      } else if (cleanInput.includes('náusea') || cleanInput.includes('vomit') || cleanInput.includes('cansad')) {
-        nivel = 'Regular'
-        if (cleanInput.includes('náusea')) listSintomas.push('Náuseas')
-        if (cleanInput.includes('cansad')) listSintomas.push('Fatiga')
-      } else {
-        listSintomas.push('Molestia general leve')
+      // Extracción detallada de síntomas específicos
+      if (cleanInput.includes('náusea') || cleanInput.includes('nausea') || cleanInput.includes('vomit') || cleanInput.includes('vómito')) {
+        listSintomas.push('Náuseas / Vómitos')
+      }
+      if (cleanInput.includes('cabeza') || cleanInput.includes('cefalea')) {
+        listSintomas.push('Cefalea / Dolor de Cabeza')
+      }
+      if (cleanInput.includes('hinchad') || cleanInput.includes('hinchazon') || cleanInput.includes('edema')) {
+        listSintomas.push('Hinchazón / Edemas')
+        if (cleanInput.includes('pie')) hinchazonDetalle = 'Sí, en los pies'
+        else if (cleanInput.includes('mano')) hinchazonDetalle = 'Sí, en las manos'
+        else if (cleanInput.includes('cara')) hinchazonDetalle = 'Sí, en la cara'
+        else hinchazonDetalle = 'Sí, en varias partes del cuerpo'
+      }
+      if (cleanInput.includes('cansad') || cleanInput.includes('fatiga') || cleanInput.includes('sueño')) {
+        listSintomas.push('Cansancio / Fatiga Extrema')
+      }
+      if (cleanInput.includes('reflujo') || cleanInput.includes('acidez') || cleanInput.includes('ardor')) {
+        listSintomas.push('Acidez / Reflujo')
+      }
+      if (cleanInput.includes('sangrado') || cleanInput.includes('sangre')) {
+        listSintomas.push('Sangrado Vaginal')
+        esCritico = true
+      }
+      if (cleanInput.includes('fiebre')) {
+        listSintomas.push('Fiebre')
+        esCritico = true
+      }
+      if (cleanInput.includes('liquido') || cleanInput.includes('líquido')) {
+        listSintomas.push('Pérdida de Líquido')
+        esCritico = true
+      }
+
+      if (listSintomas.length === 0) {
+        listSintomas.push('Reporte General de Malestar')
+      }
+
+      // Clasificación de Bienestar
+      if (esCritico || cleanInput.includes('fuerte dolor') || cleanInput.includes('intenso')) {
+        nivelBienestar = 'Mal'
+        esCritico = true
+      } else if (listSintomas.length >= 2 || cleanInput.includes('náusea') || cleanInput.includes('nausea') || cleanInput.includes('regular')) {
+        nivelBienestar = 'Regular'
       }
 
       actionData = {
-        id: `sintoma-${Date.now()}-${Math.random()}`,
-        fecha: new Date().toISOString().split('T')[0],
-        estado: nivel,
+        id: `sintoma-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+        bienestar: nivelBienestar,
+        movimientos: movimientosDetalle,
+        hinchazon: hinchazonDetalle,
         sintomas: listSintomas.join(', '),
-        notas: userInput
+        detalles: userInput,
+        esCritico: esCritico,
+        fecha: new Date().toISOString() // ISO completo con fecha y hora exacta actual
       }
 
       const prevSintomas = JSON.parse(localStorage.getItem('awki_diario_sintomas') || '[]')
       localStorage.setItem('awki_diario_sintomas', JSON.stringify([actionData, ...prevSintomas]))
 
       if (!aiResponseText) {
-        aiResponseText = `Entiendo perfectamente. He registrado en tu **Diario de Síntomas** que te sientes "${nivel}" y he guardado tus observaciones ("${userInput}"). ` +
-          (nivel === 'Mal' ? '⚠️ **¡Importante!** Debido a los síntomas descritos, te sugiero comunicarte de inmediato con tu médico o presionar el botón SOS.' : 'Recuerda descansar, mantenerte hidratada y consultar si las molestias persisten.')
+        aiResponseText = `¡Entendido! He registrado en tu **Diario de Síntomas** los siguientes detalles:\n` +
+          `• **Bienestar general:** ${nivelBienestar}\n` +
+          `• **Síntomas registrados:** ${listSintomas.join(', ')}\n\n` +
+          (esCritico ? '⚠️ **¡Importante!** Se detectaron signos de atención médica. Te sugiero comunicarte con tu médico o presionar el botón SOS.' : '¿Hay alguna otra molestia o cambio que quieras agregar a tu reporte de hoy?')
       }
     }
 
