@@ -1,8 +1,9 @@
 import React from 'react'
 
-export default function Encabezado({ activeTab }) {
+export default function Encabezado({ activeTab, currentUser, onLogout }) {
+  const firstName = currentUser?.name?.split(' ')[0] ?? 'Bienvenida'
   const greetings = {
-    inicio: { title: '¡Hola, María Fernanda!', subtitle: 'Estás en tu viaje más importante. Estamos contigo.', image: '/ola.png' },
+    inicio: { title: `¡Hola, ${firstName}!`, subtitle: 'Estás en tu viaje más importante. Estamos contigo.', image: '/ola.png' },
     embarazo: { title: 'Mi Embarazo', subtitle: 'Sigue el progreso de tu bebé semana a semana.', image: '/embarazo.png' },
     controles: { title: 'Controles y Citas', subtitle: 'Gestiona tus citas prenatales con facilidad.', image: '/calendario.png' },
     historial: { title: 'Historial Médico', subtitle: 'Tu historial clínico completo en un solo lugar.', image: '/historial.png' },
@@ -50,9 +51,12 @@ export default function Encabezado({ activeTab }) {
         </button>
 
         {/* Logout */}
-        <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 text-gray-500 text-sm font-medium hover:border-pink-300 hover:text-pink-500 transition-all duration-200">
+        <button
+          onClick={onLogout}
+          className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 text-gray-500 text-sm font-medium hover:border-pink-300 hover:text-pink-500 transition-all duration-200"
+        >
           <span>Cerrar sesión</span>
-          <span><img src="/cerrar_sesion.png" alt="logo_cerrar_sesion" className='w-full h-full object-cover'></img></span>
+          <span><img src="/cerrar_sesion.png" alt="logo_cerrar_sesion" className='w-5 h-5 object-cover'></img></span>
         </button>
       </div>
     </header>
