@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import BarraLateral from './components/BarraLateral'
+import BottomNavGestante from './components/BottomNavGestante'
 import Encabezado from './components/Encabezado'
 import VistaInicio from './components/views/VistaInicio'
 import VistaPendiente from './components/views/VistaPendiente'
@@ -118,16 +119,66 @@ export default function App() {
     return <VistaPendiente tab={activeTab} />
   }
 
-  return (
-    <div className="flex h-screen bg-[#f9f5ff] overflow-hidden">
-      <BarraLateral activeTab={activeTab} setActiveTab={setActiveTab} currentUser={currentUser} />
-      <div className="flex flex-col flex-1 ml-[220px] h-screen overflow-hidden">
-        <Encabezado activeTab={activeTab} currentUser={currentUser} onLogout={handleLogout} />
-        <main className="flex-1 overflow-y-auto p-6">
-          {renderView()}
-        </main>
+  const isDoctor = currentUser?.role === 'MEDICO' || currentUser?.role === 'ADMIN_CLINICA'
+
+  // ── LAYOUT DOCTOR (Desktop-First) ──────────────────────────────────────────
+  if (isDoctor) {
+    return (
+      <div className="flex h-screen bg-gray-50 overflow-hidden">
+        {/* Sidebar fija de 240px solo para doctores */}
+        <BarraLateral
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          currentUser={currentUser}
+        />
+        {/* Contenido principal con margen para sidebar */}
+        <div
+          className="flex flex-col flex-1 h-screen overflow-hidden"
+          style={{ marginLeft: 'var(--doctor-sidebar-width)' }}
+        >
+          <Encabezado
+            activeTab={activeTab}
+            currentUser={currentUser}
+            onLogout={handleLogout}
+          />
+          <main className="flex-1 overflow-y-auto p-6">
+            {renderView()}
+          </main>
+        </div>
       </div>
+    )
+  }
+
+  // ── LAYOUT GESTANTE (Mobile-First) ─────────────────────────────────────────
+  return (
+    <div className="flex flex-col h-screen bg-[#f9f5ff] overflow-hidden">
+      {/* Header compacto */}
+      <Encabezado
+        activeTab={activeTab}
+        currentUser={currentUser}
+        onLogout={handleLogout}
+      />
+
+      {/* Main — con padding-bottom para bottom nav */}
+      <main
+        className="flex-1 overflow-y-auto"
+        style={{ paddingBottom: 'calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + 8px)' }}
+      >
+        <div className="px-4 py-4 max-w-2xl mx-auto">
+          {renderView()}
+        </div>
+      </main>
+
+      {/* Botón SOS flotante */}
       <BotonSos currentUser={currentUser} />
+
+      {/* Bottom navigation fija */}
+      <BottomNavGestante
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        currentUser={currentUser}
+        onLogout={handleLogout}
+      />
     </div>
   )
 }

@@ -150,14 +150,18 @@ export default function AccionesRapidas({ onActionComplete }) {
     if (onActionComplete) onActionComplete('recordatorio')
   }
 
+  // Clases reutilizables para inputs y selects en modales (evitan zoom en iOS)
+  const inputCls = "w-full border border-gray-200 rounded-xl px-3 focus:outline-none focus:ring-2 focus:ring-pink-100 mt-1 bg-gray-50 text-gray-700 font-medium"
+  const inputStyle = { fontSize: '16px', minHeight: '48px' }
+
   return (
     <>
       {createPortal(
         <>
           {/* MODAL: Agendar Cita */}
           {modalAbierto === 'cita' && (
-            <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[100] p-4">
-              <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-xl border border-pink-100">
+            <div className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-[100] p-0 sm:p-4">
+              <div className="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-md shadow-xl border border-pink-100 max-h-[90vh] overflow-y-auto">
                 <h2 className="font-bold text-lg text-gray-800 mb-1 flex items-center gap-2"><Calendar className="w-5 h-5 text-pink-500" /> Agendar Cita Obstétrica</h2>
                 <p className="text-sm text-gray-400 mb-4">Elige cuándo te gustaría agendar tu próxima consulta médica.</p>
                 
@@ -167,7 +171,8 @@ export default function AccionesRapidas({ onActionComplete }) {
                     <select
                       value={citaTipo}
                       onChange={e => setCitaTipo(e.target.value)}
-                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-100 font-medium text-gray-700 mt-1"
+                      className={inputCls}
+                      style={inputStyle}
                     >
                       <option>Control Prenatal</option>
                       <option>Ecografía</option>
@@ -181,7 +186,8 @@ export default function AccionesRapidas({ onActionComplete }) {
                     <select
                       value={citaEspecialista}
                       onChange={e => setCitaEspecialista(e.target.value)}
-                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-100 font-medium text-gray-700 mt-1"
+                      className={inputCls}
+                      style={inputStyle}
                     >
                       <option>Cualquier especialista disponible</option>
                       <option>Dr. Mendoza (Obstetra)</option>
@@ -198,7 +204,8 @@ export default function AccionesRapidas({ onActionComplete }) {
                         required
                         value={citaFecha}
                         onChange={e => setCitaFecha(e.target.value)}
-                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-100 mt-1"
+                        className={inputCls}
+                        style={inputStyle}
                       />
                     </div>
                     <div className="flex-1">
@@ -208,7 +215,8 @@ export default function AccionesRapidas({ onActionComplete }) {
                         required
                         value={citaHora}
                         onChange={e => setCitaHora(e.target.value)}
-                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-100 mt-1"
+                        className={inputCls}
+                        style={inputStyle}
                       />
                     </div>
                   </div>
@@ -220,21 +228,22 @@ export default function AccionesRapidas({ onActionComplete }) {
                       value={citaMotivo}
                       onChange={e => setCitaMotivo(e.target.value)}
                       placeholder="Ej: control mensual, dolores ligeros..."
-                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-pink-100 mt-1"
+                      className="w-full border border-gray-200 rounded-xl px-3 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-pink-100 mt-1"
+                      style={{ fontSize: '16px' }}
                     />
                   </div>
                   
-                  <div className="flex justify-end gap-2 mt-2 pt-2 border-t border-gray-100">
+                  <div className="flex gap-2 mt-2 pt-2 border-t border-gray-100">
                     <button
                       type="button"
                       onClick={() => setModalAbierto(null)}
-                      className="px-4 py-2 rounded-xl border text-sm font-semibold text-gray-500 hover:bg-gray-50 transition-colors"
+                      className="flex-1 py-4 rounded-xl border text-base font-semibold text-gray-500 hover:bg-gray-50 transition-colors"
                     >
                       Cancelar
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 rounded-xl bg-pink-600 hover:bg-pink-700 text-white text-sm font-semibold shadow-md transition-colors"
+                      className="flex-1 py-4 rounded-xl bg-pink-600 hover:bg-pink-700 text-white text-base font-bold shadow-md transition-colors"
                     >
                       Agendar Cita
                     </button>
@@ -246,8 +255,8 @@ export default function AccionesRapidas({ onActionComplete }) {
 
           {/* MODAL: Registrar Control (Diario de Síntomas) */}
           {modalAbierto === 'control' && (
-            <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[100] p-4">
-              <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-xl border border-pink-100">
+            <div className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-[100] p-0 sm:p-4">
+              <div className="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-md shadow-xl border border-pink-100 max-h-[90vh] overflow-y-auto">
                 <h2 className="font-bold text-lg text-gray-800 mb-1 flex items-center gap-2"><Heart className="w-5 h-5 text-pink-500" /> Registro de Bienestar Diario</h2>
                 <p className="text-sm text-gray-400 mb-4">Anota tus síntomas diarios para el seguimiento clínico de tu embarazo.</p>
                 
@@ -257,7 +266,8 @@ export default function AccionesRapidas({ onActionComplete }) {
                     <select
                       value={sintomaMovimientos}
                       onChange={e => setSintomaMovimientos(e.target.value)}
-                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-100 font-medium text-gray-700 mt-1"
+                      className={inputCls}
+                      style={inputStyle}
                     >
                       <option>Normales, como siempre</option>
                       <option>Los siento menos que antes</option>
@@ -270,7 +280,8 @@ export default function AccionesRapidas({ onActionComplete }) {
                     <select
                       value={sintomaHinchazon}
                       onChange={e => setSintomaHinchazon(e.target.value)}
-                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-100 font-medium text-gray-700 mt-1"
+                      className={inputCls}
+                      style={inputStyle}
                     >
                       <option>No, ninguna</option>
                       <option>Sí, en los pies</option>
@@ -290,7 +301,8 @@ export default function AccionesRapidas({ onActionComplete }) {
                         checkSintomaAlarma(e.target.value)
                       }}
                       placeholder="Ej: dolor de cabeza leve, náuseas, calambres..."
-                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-pink-100 mt-1"
+                      className="w-full border border-gray-200 rounded-xl px-3 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-pink-100 mt-1"
+                      style={{ fontSize: '16px' }}
                     />
                   </div>
 
@@ -300,17 +312,17 @@ export default function AccionesRapidas({ onActionComplete }) {
                     </div>
                   )}
 
-                  <div className="flex justify-end gap-2 mt-2 pt-2 border-t border-gray-100">
+                  <div className="flex gap-2 mt-2 pt-2 border-t border-gray-100">
                     <button
                       type="button"
                       onClick={() => setModalAbierto(null)}
-                      className="px-4 py-2 rounded-xl border text-sm font-semibold text-gray-500 hover:bg-gray-50"
+                      className="flex-1 py-4 rounded-xl border text-base font-semibold text-gray-500 hover:bg-gray-50"
                     >
                       Cancelar
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold shadow-md"
+                      className="flex-1 py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-base font-bold shadow-md"
                     >
                       Guardar Reporte
                     </button>
@@ -322,8 +334,8 @@ export default function AccionesRapidas({ onActionComplete }) {
 
           {/* MODAL: Registrar Peso */}
           {modalAbierto === 'peso' && (
-            <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[100] p-4">
-              <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-xl border border-pink-100">
+            <div className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-[100] p-0 sm:p-4">
+              <div className="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-md shadow-xl border border-pink-100 max-h-[90vh] overflow-y-auto">
                 <h2 className="font-bold text-lg text-gray-800 mb-1 flex items-center gap-2"><Scale className="w-5 h-5 text-green-500" /> Registrar Peso Corporal</h2>
                 <p className="text-sm text-gray-400 mb-4">Lleva el seguimiento diario de tu peso para auditar la curva de evolución.</p>
                 
@@ -339,7 +351,8 @@ export default function AccionesRapidas({ onActionComplete }) {
                       placeholder="Ej: 64.5"
                       value={pesoVal}
                       onChange={e => setPesoVal(e.target.value)}
-                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-100 mt-1"
+                      className={inputCls}
+                      style={inputStyle}
                     />
                   </div>
                   <div>
@@ -349,21 +362,22 @@ export default function AccionesRapidas({ onActionComplete }) {
                       required
                       value={pesoFecha}
                       onChange={e => setPesoFecha(e.target.value)}
-                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-100 mt-1"
+                      className={inputCls}
+                      style={inputStyle}
                     />
                   </div>
                   
-                  <div className="flex justify-end gap-2 mt-2 pt-2 border-t border-gray-100">
+                  <div className="flex gap-2 mt-2 pt-2 border-t border-gray-100">
                     <button
                       type="button"
                       onClick={() => setModalAbierto(null)}
-                      className="px-4 py-2 rounded-xl border text-sm font-semibold text-gray-500 hover:bg-gray-50"
+                      className="flex-1 py-4 rounded-xl border text-base font-semibold text-gray-500 hover:bg-gray-50"
                     >
                       Cancelar
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-semibold shadow-md"
+                      className="flex-1 py-4 rounded-xl bg-green-600 hover:bg-green-700 text-white text-base font-bold shadow-md"
                     >
                       Guardar Peso
                     </button>
@@ -375,8 +389,8 @@ export default function AccionesRapidas({ onActionComplete }) {
 
           {/* MODAL: Recordatorios */}
           {modalAbierto === 'recordatorio' && (
-            <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[100] p-4">
-              <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-xl border border-pink-100">
+            <div className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-[100] p-0 sm:p-4">
+              <div className="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-md shadow-xl border border-pink-100 max-h-[90vh] overflow-y-auto">
                 <h2 className="font-bold text-lg text-gray-800 mb-1 flex items-center gap-2"><Bell className="w-5 h-5 text-amber-500" /> Crear Nuevo Recordatorio</h2>
                 <p className="text-sm text-gray-400 mb-4">Crea una alarma para tus vitaminas, medicamentos o actividades clínicas.</p>
                 
@@ -389,7 +403,8 @@ export default function AccionesRapidas({ onActionComplete }) {
                       placeholder="Ej: Tomar Ácido Fólico, control médico..."
                       value={recTitulo}
                       onChange={e => setRecTitulo(e.target.value)}
-                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-100 mt-1"
+                      className={inputCls}
+                      style={inputStyle}
                     />
                   </div>
                   
@@ -401,7 +416,8 @@ export default function AccionesRapidas({ onActionComplete }) {
                         required
                         value={recFecha}
                         onChange={e => setRecFecha(e.target.value)}
-                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-100 mt-1"
+                        className={inputCls}
+                        style={inputStyle}
                       />
                     </div>
                     <div className="flex-1">
@@ -411,22 +427,23 @@ export default function AccionesRapidas({ onActionComplete }) {
                         required
                         value={recHora}
                         onChange={e => setRecHora(e.target.value)}
-                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-100 mt-1"
+                        className={inputCls}
+                        style={inputStyle}
                       />
                     </div>
                   </div>
                   
-                  <div className="flex justify-end gap-2 mt-2 pt-2 border-t border-gray-100">
+                  <div className="flex gap-2 mt-2 pt-2 border-t border-gray-100">
                     <button
                       type="button"
                       onClick={() => setModalAbierto(null)}
-                      className="px-4 py-2 rounded-xl border text-sm font-semibold text-gray-500 hover:bg-gray-50"
+                      className="flex-1 py-4 rounded-xl border text-base font-semibold text-gray-500 hover:bg-gray-50"
                     >
                       Cancelar
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold shadow-md"
+                      className="flex-1 py-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-base font-bold shadow-md"
                     >
                       Guardar Alarma
                     </button>
@@ -439,22 +456,22 @@ export default function AccionesRapidas({ onActionComplete }) {
         document.body
       )}
 
-      {/* Quick Actions Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {/* Quick Actions Grid — 2x2 en móvil, 4 cols en desktop */}
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {[
-          { id: 'cita', icon: <img src='/calendario.png' alt='logo_calendario' className="w-7 h-7" />, label: 'Agendar cita', sub: 'Reservar nueva cita', color: 'bg-pink-50 text-pink-600 border-pink-100 hover:border-pink-200' },
-          { id: 'control', icon: <img src='/control.png' alt='logo_control' className="w-7 h-7" />, label: 'Registrar control', sub: 'Añadir nuevo control', color: 'bg-blue-50 text-blue-600 border-blue-100 hover:border-blue-200' },
-          { id: 'peso', icon: <img src='/peso.png' alt='logo_peso' className="w-7 h-7" />, label: 'Registrar peso', sub: 'Llevar seguimiento', color: 'bg-green-50 text-green-600 border-green-100 hover:border-green-200' },
-          { id: 'recordatorio', icon: <img src='/notificacion.png' alt='logo_notificacion' className="w-7 h-7" />, label: 'Recordatorios', sub: 'Nueva alarma/vitamina', color: 'bg-amber-50 text-amber-600 border-amber-100 hover:border-amber-200' },
+          { id: 'cita', icon: <img src='/calendario.png' alt='logo_calendario' className="w-8 h-8" />, label: 'Agendar cita', sub: 'Reservar nueva cita', color: 'bg-pink-50 text-pink-600 border-pink-100 hover:border-pink-200' },
+          { id: 'control', icon: <img src='/control.png' alt='logo_control' className="w-8 h-8" />, label: 'Registrar control', sub: 'Añadir nuevo control', color: 'bg-blue-50 text-blue-600 border-blue-100 hover:border-blue-200' },
+          { id: 'peso', icon: <img src='/peso.png' alt='logo_peso' className="w-8 h-8" />, label: 'Registrar peso', sub: 'Llevar seguimiento', color: 'bg-green-50 text-green-600 border-green-100 hover:border-green-200' },
+          { id: 'recordatorio', icon: <img src='/notificacion.png' alt='logo_notificacion' className="w-8 h-8" />, label: 'Recordatorios', sub: 'Nueva alarma/vitamina', color: 'bg-amber-50 text-amber-600 border-amber-100 hover:border-amber-200' },
         ].map((a) => (
           <button
             key={a.label}
             onClick={() => setModalAbierto(a.id)}
-            className={`flex flex-col items-start p-4 rounded-2xl border ${a.color} hover:scale-[1.03] transition-all duration-200 shadow-sm text-left`}
+            className={`flex flex-col items-start p-4 rounded-2xl border ${a.color} hover:scale-[1.03] transition-all duration-200 shadow-sm text-left min-h-[90px]`}
           >
             <span className="mb-2">{a.icon}</span>
-            <p className="font-bold text-[13px] leading-tight">{a.label}</p>
-            <p className="text-[11px] opacity-70 mt-0.5">{a.sub}</p>
+            <p className="font-bold text-sm leading-tight">{a.label}</p>
+            <p className="text-xs opacity-70 mt-0.5">{a.sub}</p>
           </button>
         ))}
       </div>

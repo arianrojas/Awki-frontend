@@ -115,6 +115,7 @@ function FormRegistroEmbarazo({ currentUser, onCreated }) {
             value={fum}
             onChange={e => setFum(e.target.value)}
             disabled={loading}
+            style={{ fontSize: '16px' }}
             className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-700 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-200 focus:border-pink-300 focus:bg-white transition-all disabled:opacity-50"
           />
         </div>
@@ -131,6 +132,7 @@ function FormRegistroEmbarazo({ currentUser, onCreated }) {
               value={gestaciones}
               onChange={e => setGestaciones(e.target.value)}
               disabled={loading}
+              style={{ fontSize: '16px' }}
               className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-700 bg-gray-50 focus:outline-none"
             />
           </div>
@@ -144,6 +146,7 @@ function FormRegistroEmbarazo({ currentUser, onCreated }) {
               value={partos}
               onChange={e => setPartos(e.target.value)}
               disabled={loading}
+              style={{ fontSize: '16px' }}
               className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-700 bg-gray-50 focus:outline-none"
             />
           </div>
@@ -160,6 +163,7 @@ function FormRegistroEmbarazo({ currentUser, onCreated }) {
               value={abortos}
               onChange={e => setAbortos(e.target.value)}
               disabled={loading}
+              style={{ fontSize: '16px' }}
               className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-700 bg-gray-50 focus:outline-none"
             />
           </div>
@@ -173,6 +177,7 @@ function FormRegistroEmbarazo({ currentUser, onCreated }) {
               value={cesareas}
               onChange={e => setCesareas(e.target.value)}
               disabled={loading}
+              style={{ fontSize: '16px' }}
               className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-700 bg-gray-50 focus:outline-none"
             />
           </div>
@@ -202,7 +207,7 @@ function FormRegistroEmbarazo({ currentUser, onCreated }) {
         <button
           type="submit"
           disabled={loading || !fum}
-          className="w-full py-3.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 disabled:from-gray-200 disabled:to-gray-300 disabled:cursor-not-allowed text-white font-bold text-sm transition-all shadow-md hover:shadow-pink-200 flex items-center justify-center gap-2 mt-2"
+          className="w-full py-4 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 disabled:from-gray-200 disabled:to-gray-300 disabled:cursor-not-allowed text-white font-bold text-base transition-all shadow-md hover:shadow-pink-200 flex items-center justify-center gap-2 mt-2"
         >
           {loading ? 'Registrando...' : 'Registrar Embarazo →'}
         </button>
@@ -402,34 +407,34 @@ export default function VistaInicio({ currentUser, onPregnancyCreated }) {
       <div className="animate-fade-in">
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
 
-          {/* ── LEFT + CENTER (2 cols) ── */}
+          {/* ── LEFT + CENTER (2 cols en xl) ── */}
           <div className="xl:col-span-2 flex flex-col gap-5">
 
-            {/* Tarjeta de semanas gestacionales */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-pink-50 relative overflow-hidden">
-              <div className="flex items-start gap-6">
-                <div className="flex-1">
-                  <p className="text-gray-400 text-sm font-medium mb-1">Semana actual</p>
-                  <h2 className="text-4xl font-extrabold text-gray-800 leading-none">{semanas} semanas</h2>
-                  <p className="text-pink-500 font-semibold text-sm mt-1">({trimestreText})</p>
-                  <p className="text-gray-500 text-sm mt-2 max-w-[200px]">Tu bebé es del tamaño de {fruitSize}.</p>
+            {/* Tarjeta de semanas gestacionales — hero full-width mobile */}
+            <div className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-3xl p-6 shadow-sm border border-pink-100 relative overflow-hidden">
+              {/* Corazón animado — centrado arriba en móvil */}
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 rounded-full bg-white/80 shadow-md flex items-center justify-center animate-pulse">
+                  <Heart className="w-8 h-8 text-pink-500" />
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="w-24 h-24 flex items-center justify-center">
-                    <div className="w-20 h-20 rounded-full bg-pink-100 flex items-center justify-center animate-pulse">
-                      <Heart className="w-10 h-10 text-pink-500" />
-                    </div>
-                  </div>
-                </div>
+              </div>
+
+              {/* Número de semanas — prominente */}
+              <div className="text-center mb-4">
+                <p className="text-gray-400 text-sm font-medium mb-1">Semana actual</p>
+                <h2 className="text-5xl font-extrabold text-gray-800 leading-none">{semanas}</h2>
+                <p className="text-gray-500 text-sm font-medium mt-1">semanas de gestación</p>
+                <p className="text-pink-500 font-semibold text-sm mt-1">({trimestreText})</p>
+                <p className="text-gray-500 text-sm mt-2">Tu bebé es del tamaño de {fruitSize}.</p>
               </div>
               
               {/* Barra de progreso */}
-              <div className="mt-5">
+              <div className="mt-4">
                 <div className="flex justify-between items-center mb-2">
-                  <p className="text-gray-400 text-xs font-medium">Progreso del embarazo</p>
+                  <p className="text-gray-500 text-xs font-medium">Progreso del embarazo</p>
                   <p className="text-gray-400 text-xs flex items-center gap-1">FPP: {fpp} <Calendar className="w-3 h-3" /></p>
                 </div>
-                <div className="bg-pink-50 rounded-full h-2 overflow-hidden">
+                <div className="bg-white/60 rounded-full h-2.5 overflow-hidden">
                   <div className="progress-pregnancy" style={{ width: `${progressPercent}%` }} />
                 </div>
                 <p className="text-pink-600 font-bold text-sm mt-1.5">{progressPercent}%</p>
@@ -439,25 +444,25 @@ export default function VistaInicio({ currentUser, onPregnancyCreated }) {
             {/* Acciones Rápidas */}
             <AccionesRapidas onActionComplete={handleActionComplete} />
 
-            {/* Resumen de Salud e Historial */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {/* Resumen de Salud e Historial — 1 columna en móvil, 2 en sm+ */}
+            <div className="flex flex-col gap-5">
               
               {/* Métricas Clínicas */}
               <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50">
-                <h3 className="font-bold text-gray-700 text-[15px] mb-4">Resumen de salud (Último Control)</h3>
-                <div className="flex flex-col gap-3">
+                <h3 className="font-bold text-gray-700 text-base mb-4">Resumen de salud (Último Control)</h3>
+                <div className="flex flex-col gap-1">
                   {[
                     { icon: <Scale className="w-4 h-4" />,       label: 'Peso registrado', value: pesoActual, color: 'text-pink-500' },
                     { icon: <Syringe className="w-4 h-4" />,     label: 'Presión arterial', value: presionActual, color: 'text-orange-500' },
                     { icon: <Droplets className="w-4 h-4" />,    label: 'Hemoglobina', value: hemoglobinaActual, color: 'text-red-500' },
                     { icon: <ClipboardList className="w-4 h-4" />,label: 'Semáforo de riesgo', value: ultimoControl?.nivelRiesgoCalculado ?? 'Verde', color: ultimoControl?.nivelRiesgoCalculado === 'ROJO' ? 'text-red-600' : ultimoControl?.nivelRiesgoCalculado === 'AMARILLO' ? 'text-amber-500' : 'text-green-500' },
                   ].map((m) => (
-                    <div key={m.label} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+                    <div key={m.label} className="flex items-center justify-between py-3.5 border-b border-gray-50 last:border-0">
                       <div className="flex items-center gap-2">
                         <span>{m.icon}</span>
-                        <span className="text-gray-500 text-xs">{m.label}</span>
+                        <span className="text-gray-500 text-sm">{m.label}</span>
                       </div>
-                      <span className={`font-bold text-xs ${m.color}`}>{m.value}</span>
+                      <span className={`font-bold text-sm ${m.color}`}>{m.value}</span>
                     </div>
                   ))}
                 </div>
@@ -465,7 +470,7 @@ export default function VistaInicio({ currentUser, onPregnancyCreated }) {
 
               {/* Gráfico del Peso */}
               <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50">
-                <h3 className="font-bold text-gray-700 text-[15px] mb-3">Evolución del peso (kg)</h3>
+                <h3 className="font-bold text-gray-700 text-base mb-3">Evolución del peso (kg)</h3>
                 <div className="mt-2">
                   <MiniLineChart weights={pesosList} weeks={semanasList} />
                 </div>
@@ -476,13 +481,13 @@ export default function VistaInicio({ currentUser, onPregnancyCreated }) {
             <SeccionArticulos />
           </div>
 
-          {/* ── COLUMNA DERECHA ── */}
+          {/* ── COLUMNA DERECHA — apilada en móvil, lateral en xl ── */}
           <div className="flex flex-col gap-5">
             
             {/* Próximo control */}
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-gray-700 text-[15px]">Próximo control</h3>
+                <h3 className="font-bold text-gray-700 text-base">Próximo control</h3>
                 <div className="w-9 h-9 rounded-full bg-purple-100 flex items-center justify-center">
                   <Calendar className="w-5 h-5 text-purple-500" />
                 </div>
@@ -492,8 +497,8 @@ export default function VistaInicio({ currentUser, onPregnancyCreated }) {
               </p>
               <div className="flex flex-col gap-2 mb-4">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-600 font-medium">Fecha:</span>
-                  <span className="text-gray-800 text-xs font-bold">
+                  <span className="text-sm text-gray-600 font-medium">Fecha:</span>
+                  <span className="text-gray-800 text-sm font-bold">
                     {proximaCitaAVisualizar 
                       ? new Date(proximaCitaAVisualizar.fecha + 'T00:00:00').toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' })
                       : 'No programada'}
@@ -501,13 +506,13 @@ export default function VistaInicio({ currentUser, onPregnancyCreated }) {
                 </div>
                 {proximaCitaAVisualizar?.especialista && (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-600 font-medium">Especialista:</span>
-                    <span className="text-gray-800 text-xs font-semibold">{proximaCitaAVisualizar.especialista}</span>
+                    <span className="text-sm text-gray-600 font-medium">Especialista:</span>
+                    <span className="text-gray-800 text-sm font-semibold">{proximaCitaAVisualizar.especialista}</span>
                   </div>
                 )}
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-600 font-medium">Estado:</span>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${proximaCitaAVisualizar ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-gray-50 text-gray-400'}`}>
+                  <span className="text-sm text-gray-600 font-medium">Estado:</span>
+                  <span className={`px-2 py-0.5 rounded text-xs font-bold ${proximaCitaAVisualizar ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-gray-50 text-gray-400'}`}>
                     {proximaCitaAVisualizar ? (esCitaLocal ? 'Confirmada (Local)' : 'Programada (Médico)') : 'Sin fecha'}
                   </span>
                 </div>
@@ -516,7 +521,7 @@ export default function VistaInicio({ currentUser, onPregnancyCreated }) {
 
             {/* Checklist Prenatal */}
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50 flex-1">
-              <h3 className="font-bold text-gray-700 text-[15px] mb-4">Checklist de controles prenatales</h3>
+              <h3 className="font-bold text-gray-700 text-base mb-4">Checklist de controles prenatales</h3>
               
               {cargando ? (
                 <div className="flex justify-center items-center py-10">
@@ -541,10 +546,10 @@ export default function VistaInicio({ currentUser, onPregnancyCreated }) {
                           {item.active && <span className="w-2.5 h-2.5 bg-pink-400 rounded-full block" />}
                         </div>
                         <div>
-                          <p className={`text-[13px] font-semibold ${item.active ? 'text-pink-600' : item.done ? 'text-gray-600' : 'text-gray-400'}`}>
+                          <p className={`text-sm font-semibold ${item.active ? 'text-pink-600' : item.done ? 'text-gray-600' : 'text-gray-400'}`}>
                             {item.label}
                           </p>
-                          <p className={`text-[11px] ${item.active ? 'text-pink-400' : 'text-gray-400'}`}>{item.sub}</p>
+                          <p className={`text-xs ${item.active ? 'text-pink-400' : 'text-gray-400'}`}>{item.sub}</p>
                         </div>
                       </div>
                       <span className="text-gray-300 text-sm">›</span>
