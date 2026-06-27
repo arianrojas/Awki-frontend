@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { api } from '../../services/api'
 import { indexedDbHelper } from '../../utils/indexedDbHelper'
+import { aiAssistantService } from '../../services/aiAssistantService'
 
 // ─── Badges ───────────────────────────────────────────────────────────────────
 function Badge({ color, icon, label }) {
@@ -269,20 +270,29 @@ export default function VistaChat() {
     scrollToBottom()
 
     try {
-      const resp = await api.post('/api/v1/chat/mensaje', { embarazoId, contenido })
+      let resp = null
+      try {
+        resp = await api.post('/api/v1/chat/mensaje', { embarazoId, contenido })
+      } catch (backendErr) {
+        console.warn("Backend chat endpoint fallback to AI Service:", backendErr)
+      }
+
+      // Procesar con el motor inteligente de IA Awki (reconoce intenciones y modifica estado del sistema)
+      const aiResult = await aiAssistantService.processUserMessage(contenido, mensajes)
+
       const iaMsg = {
-        id: resp.mensajeIaId,
+        id: resp?.mensajeIaId || `ia-${Date.now()}`,
         rol: 'IA',
-        contenido: resp.respuesta,
-        alarmaProbable: resp.alarmaProbable,
-        desdeCache:     resp.desdeCache,
-        fallbackUsado:  resp.fallbackUsado,
-        createdAt: resp.timestamp,
+        contenido: resp?.respuesta || aiResult.contenido,
+        alarmaProbable: resp?.alarmaProbable || aiResult.action === 'UPDATE_SYMPTOMS' && aiResult.data?.estado === 'Mal',
+        desdeCache:     resp?.desdeCache || false,
+        fallbackUsado:  resp?.fallbackUsado || !resp,
+        createdAt: resp?.timestamp || aiResult.createdAt,
       }
       setMensajes(prev => [...prev, iaMsg])
       scrollToBottom()
     } catch (err) {
-      console.warn("Fallo de red al enviar mensaje, guardando localmente:", err)
+      console.warn("Fallo al enviar mensaje, guardando localmente:", err)
       const offlineMsg = {
         id: tempId,
         embarazoId,

@@ -14,6 +14,7 @@ import VistaHistorial from './components/views/VistaHistorial'
 import VistaSintomas from './components/views/VistaSintomas'
 import VistaRecordatorios from './components/views/VistaRecordatorios'
 import VistaEducacion from './components/views/VistaEducacion'
+import VistaAdministracionClinica from './components/views/VistaAdministracionClinica'
 import BotonSos from './components/BotonSos'
 
 export default function App() {
@@ -113,6 +114,7 @@ export default function App() {
     if (activeTab === 'recordatorios') return <VistaRecordatorios />
     if (activeTab === 'educacion')     return <VistaEducacion />
     if (activeTab === 'doctor')        return <DoctorDashboard />
+    if (activeTab === 'admin_clinica') return <VistaAdministracionClinica />
     return <VistaPendiente tab={activeTab} />
   }
 

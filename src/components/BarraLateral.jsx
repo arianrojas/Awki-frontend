@@ -11,6 +11,7 @@ const navItems = [
   { id: 'recordatorios', icon: <img src="/notificacion.png" alt="logo_notificacion" className='w-full h-full object-cover'></img>, label: 'Recordatorios' },
   { id: 'mensajes', icon: <img src="/mensaje.png" alt="logo_mensaje" className='w-full h-full object-cover'></img>, label: 'Mensajes' },
   { id: 'doctor', icon: <span className="text-lg leading-none">👨‍⚕️</span>, label: 'Panel Médico (Demo)' },
+  { id: 'admin_clinica', icon: <span className="text-lg leading-none">🏥</span>, label: 'Gestión Clínica (Admin)' },
 ]
 
 export default function BarraLateral({ activeTab, setActiveTab, currentUser }) {
@@ -18,9 +19,9 @@ export default function BarraLateral({ activeTab, setActiveTab, currentUser }) {
 
   const items = navItems.filter(item => {
     if (isDoctor) {
-      return item.id === 'doctor'
+      return item.id === 'doctor' || item.id === 'admin_clinica'
     } else {
-      return item.id !== 'doctor'
+      return item.id !== 'doctor' && item.id !== 'admin_clinica'
     }
   })
 
