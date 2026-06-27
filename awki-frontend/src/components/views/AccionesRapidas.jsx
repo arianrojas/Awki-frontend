@@ -1,77 +1,276 @@
 import React, { useState } from 'react'
 import { createPortal } from 'react-dom'
 
-export default function AccionesRapidas() {
+export default function AccionesRapidas({ onActionComplete }) {
   const [modalAbierto, setModalAbierto] = useState(null)
+
+  // Estados para Registrar Peso
+  const [pesoVal, setPesoVal] = useState('')
+  const [pesoFecha, setPesoFecha] = useState(new Date().toISOString().split('T')[0])
+
+  // Estados para Agendar Cita
+  const [citaTipo, setCitaTipo] = useState('Control Prenatal')
+  const [citaEspecialista, setCitaEspecialista] = useState('Dr. Mendoza (Obstetra)')
+  const [citaFecha, setCitaFecha] = useState('')
+  const [citaHora, setCitaHora] = useState('')
+  const [citaMotivo, setCitaMotivo] = useState('')
+
+  // Estados para Registrar Control / Síntomas
+  const [sintomaMovimientos, setSintomaMovimientos] = useState('Normales, como siempre')
+  const [sintomaHinchazon, setSintomaHinchazon] = useState('No, ninguna')
+  const [sintomaDetalles, setSintomaDetalles] = useState('')
+  const [sintomaAlarmaCritico, setSintomaAlarmaCritico] = useState(false)
+
+  // Estados para Recordatorios
+  const [recTitulo, setRecTitulo] = useState('')
+  const [recFecha, setRecFecha] = useState('')
+  const [recHora, setRecHora] = useState('')
+
+  // Mensajes de Alerta/Feedback
+  const [feedbackError, setFeedbackError] = useState(null)
+
+  const checkSintomaAlarma = (texto) => {
+    const terminosAlarma = ['sangrado', 'sangre', 'hemorragia', 'liquido', 'líquido', 'fiebre', 'dolor fuerte', 'contraccion', 'contracción', 'no siento', 'sin movimientos', 'vision borrosa', 'visión borrosa', 'zumbido']
+    const textLower = (texto || '').toLowerCase()
+    const esCritico = terminosAlarma.some(term => textLower.includes(term))
+    setSintomaAlarmaCritico(esCritico)
+  }
+
+  const handleGuardarPeso = (e) => {
+    e.preventDefault()
+    if (!pesoVal) return
+
+    const listaPesos = JSON.parse(localStorage.getItem('awki_auto_pesos') || '[]')
+    const nuevoRegistro = {
+      id: `peso-${Date.now()}`,
+      pesoKg: parseFloat(pesoVal),
+      fechaControl: pesoFecha,
+      semanasGestacion: 0, // Se calculará dinámicamente si es posible
+      tipo: 'AUTO'
+    }
+
+    listaPesos.push(nuevoRegistro)
+    localStorage.setItem('awki_auto_pesos', JSON.stringify(listaPesos))
+
+    // Resetear formulario
+    setPesoVal('')
+    setModalAbierto(null)
+
+    if (onActionComplete) onActionComplete('peso')
+  }
+
+  const handleGuardarCita = (e) => {
+    e.preventDefault()
+    if (!citaFecha || !citaHora) return
+
+    const listaCitas = JSON.parse(localStorage.getItem('awki_citas_agendadas') || '[]')
+    const nuevaCita = {
+      id: `cita-${Date.now()}`,
+      tipo: citaTipo,
+      especialista: citaEspecialista,
+      fecha: citaFecha,
+      hora: citaHora,
+      motivo: citaMotivo,
+      completado: false
+    }
+
+    listaCitas.push(nuevaCita)
+    localStorage.setItem('awki_citas_agendadas', JSON.stringify(listaCitas))
+
+    // Resetear formulario
+    setCitaTipo('Control Prenatal')
+    setCitaEspecialista('Dr. Mendoza (Obstetra)')
+    setCitaFecha('')
+    setCitaHora('')
+    setCitaMotivo('')
+    setModalAbierto(null)
+
+    if (onActionComplete) onActionComplete('cita')
+  }
+
+  const handleGuardarControl = (e) => {
+    e.preventDefault()
+
+    // Determinar si hay síntomas críticos
+    const tieneSintomasCriticos = sintomaAlarmaCritico || 
+      sintomaMovimientos === 'No los he sentido' ||
+      sintomaHinchazon === 'Sí, en la cara' ||
+      sintomaHinchazon === 'Sí, en varias partes del cuerpo'
+
+    const listaControles = JSON.parse(localStorage.getItem('awki_diario_sintomas') || '[]')
+    const nuevoReporte = {
+      id: `sintoma-${Date.now()}`,
+      movimientos: sintomaMovimientos,
+      hinchazon: sintomaHinchazon,
+      detalles: sintomaDetalles,
+      esCritico: tieneSintomasCriticos,
+      fecha: new Date().toISOString()
+    }
+
+    listaControles.push(nuevoReporte)
+    localStorage.setItem('awki_diario_sintomas', JSON.stringify(listaControles))
+
+    if (tieneSintomasCriticos) {
+      alert("⚠️ ALERTA DE RIESGO: Has reportado síntomas que podrían ser signos de alarma obstétrica. Por favor, pulsa el botón rojo SOS para contactar de inmediato a tu contacto de emergencia.")
+    }
+
+    // Resetear formulario
+    setSintomaMovimientos('Normales, como siempre')
+    setSintomaHinchazon('No, ninguna')
+    setSintomaDetalles('')
+    setSintomaAlarmaCritico(false)
+    setModalAbierto(null)
+
+    if (onActionComplete) onActionComplete('control')
+  }
+
+  const handleGuardarRecordatorio = (e) => {
+    e.preventDefault()
+    if (!recTitulo || !recFecha || !recHora) return
+
+    const listaRecordatorios = JSON.parse(localStorage.getItem('awki_recordatorios') || '[]')
+    const nuevoRecordatorio = {
+      id: `rec-${Date.now()}`,
+      titulo: recTitulo,
+      fecha: recFecha,
+      hora: recHora,
+      completado: false
+    }
+
+    listaRecordatorios.push(nuevoRecordatorio)
+    localStorage.setItem('awki_recordatorios', JSON.stringify(listaRecordatorios))
+
+    // Resetear formulario
+    setRecTitulo('')
+    setRecFecha('')
+    setRecHora('')
+    setModalAbierto(null)
+
+    if (onActionComplete) onActionComplete('recordatorio')
+  }
 
   return (
     <>
       {createPortal(
         <>
+          {/* MODAL: Agendar Cita */}
           {modalAbierto === 'cita' && (
             <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[100] p-4">
-              <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
-                <h2 className="font-bold text-lg mb-1">Agendar cita</h2>
-                <p className="text-sm text-gray-500 mb-4">Elige cuándo te gustaría que sea tu próxima cita.</p>
-                <form className="flex flex-col gap-4">
+              <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-xl border border-pink-100">
+                <h2 className="font-bold text-lg text-gray-800 mb-1">📅 Agendar Cita Obstétrica</h2>
+                <p className="text-sm text-gray-400 mb-4">Elige cuándo te gustaría agendar tu próxima consulta médica.</p>
+                
+                <form onSubmit={handleGuardarCita} className="flex flex-col gap-4">
                   <div>
-                    <label className="text-sm font-medium block mb-1">Tipo de cita</label>
-                    <select className="w-full border rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-pink-300">
+                    <label className="text-xs font-semibold text-gray-500 uppercase">Tipo de Cita</label>
+                    <select
+                      value={citaTipo}
+                      onChange={e => setCitaTipo(e.target.value)}
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-100 font-medium text-gray-700 mt-1"
+                    >
                       <option>Control Prenatal</option>
                       <option>Ecografía</option>
                       <option>Nutrición</option>
                       <option>Psicología Perinatal</option>
                     </select>
                   </div>
+                  
                   <div>
-                    <label className="text-sm font-medium block mb-1">Médico o Especialista</label>
-                    <select className="w-full border rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-pink-300">
+                    <label className="text-xs font-semibold text-gray-500 uppercase">Médico o Especialista</label>
+                    <select
+                      value={citaEspecialista}
+                      onChange={e => setCitaEspecialista(e.target.value)}
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-100 font-medium text-gray-700 mt-1"
+                    >
                       <option>Cualquier especialista disponible</option>
                       <option>Dr. Mendoza (Obstetra)</option>
                       <option>Dra. Rojas (Ginecóloga)</option>
                       <option>Lic. Torres (Nutricionista)</option>
                     </select>
                   </div>
+                  
                   <div className="flex gap-3">
                     <div className="flex-1">
-                      <label className="text-sm font-medium block mb-1">Fecha</label>
-                      <input type="date" className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-pink-300" />
+                      <label className="text-xs font-semibold text-gray-500 uppercase">Fecha</label>
+                      <input
+                        type="date"
+                        required
+                        value={citaFecha}
+                        onChange={e => setCitaFecha(e.target.value)}
+                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-100 mt-1"
+                      />
                     </div>
                     <div className="flex-1">
-                      <label className="text-sm font-medium block mb-1">Hora</label>
-                      <input type="time" className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-pink-300" />
+                      <label className="text-xs font-semibold text-gray-500 uppercase">Hora</label>
+                      <input
+                        type="time"
+                        required
+                        value={citaHora}
+                        onChange={e => setCitaHora(e.target.value)}
+                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-100 mt-1"
+                      />
                     </div>
                   </div>
+                  
                   <div>
-                    <label className="text-sm font-medium block mb-1">Motivo o síntomas adicionales</label>
-                    <textarea rows={2} placeholder="Ej: control mensual, dolores ligeros..." className="w-full border rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-pink-300" />
+                    <label className="text-xs font-semibold text-gray-500 uppercase">Motivo o Síntomas</label>
+                    <textarea
+                      rows={2}
+                      value={citaMotivo}
+                      onChange={e => setCitaMotivo(e.target.value)}
+                      placeholder="Ej: control mensual, dolores ligeros..."
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-pink-100 mt-1"
+                    />
                   </div>
-                  <div className="flex justify-end gap-2 mt-1">
-                    <button type="button" onClick={() => setModalAbierto(null)} className="px-4 py-2 rounded-lg border text-sm hover:bg-gray-50 transition-colors">Cancelar</button>
-                    <button type="submit" className="px-4 py-2 rounded-lg bg-pink-600 text-white text-sm font-medium shadow-md hover:bg-pink-700 transition-colors">Confirmar cita</button>
+                  
+                  <div className="flex justify-end gap-2 mt-2 pt-2 border-t border-gray-100">
+                    <button
+                      type="button"
+                      onClick={() => setModalAbierto(null)}
+                      className="px-4 py-2 rounded-xl border text-sm font-semibold text-gray-500 hover:bg-gray-50 transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 rounded-xl bg-pink-600 hover:bg-pink-700 text-white text-sm font-semibold shadow-md transition-colors"
+                    >
+                      Agendar Cita
+                    </button>
                   </div>
                 </form>
               </div>
             </div>
           )}
 
+          {/* MODAL: Registrar Control (Diario de Síntomas) */}
           {modalAbierto === 'control' && (
             <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[100] p-4">
-              <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
-                <h2 className="font-bold text-lg mb-1">Registrar control</h2>
-                <p className="text-sm text-gray-500 mb-4">Cuéntanos cómo te has sentido.</p>
-                <form className="flex flex-col gap-4">
+              <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-xl border border-pink-100">
+                <h2 className="font-bold text-lg text-gray-800 mb-1">🤰 Registro de Bienestar Diario</h2>
+                <p className="text-sm text-gray-400 mb-4">Anota tus síntomas diarios para el seguimiento clínico de tu embarazo.</p>
+                
+                <form onSubmit={handleGuardarControl} className="flex flex-col gap-4">
                   <div>
-                    <label className="text-sm font-medium block mb-1">¿Cómo sientes los movimientos del bebé?</label>
-                    <select className="w-full border rounded-lg px-3 py-2 text-sm">
+                    <label className="text-xs font-semibold text-gray-500 uppercase">¿Cómo sientes los movimientos del bebé?</label>
+                    <select
+                      value={sintomaMovimientos}
+                      onChange={e => setSintomaMovimientos(e.target.value)}
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-100 font-medium text-gray-700 mt-1"
+                    >
                       <option>Normales, como siempre</option>
                       <option>Los siento menos que antes</option>
                       <option>No los he sentido</option>
                     </select>
                   </div>
+
                   <div>
-                    <label className="text-sm font-medium block mb-1">¿Tienes hinchazón en alguna parte?</label>
-                    <select className="w-full border rounded-lg px-3 py-2 text-sm">
+                    <label className="text-xs font-semibold text-gray-500 uppercase">¿Tienes hinchazón (Edemas)?</label>
+                    <select
+                      value={sintomaHinchazon}
+                      onChange={e => setSintomaHinchazon(e.target.value)}
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-pink-100 font-medium text-gray-700 mt-1"
+                    >
                       <option>No, ninguna</option>
                       <option>Sí, en los pies</option>
                       <option>Sí, en las manos</option>
@@ -79,65 +278,157 @@ export default function AccionesRapidas() {
                       <option>Sí, en varias partes del cuerpo</option>
                     </select>
                   </div>
+
                   <div>
-                    <label className="text-sm font-medium block mb-1">¿Algún otro síntoma? (opcional)</label>
-                    <textarea rows={2} placeholder="Ej: dolor de cabeza, náuseas, mareos..." className="w-full border rounded-lg px-3 py-2 text-sm resize-none" />
+                    <label className="text-xs font-semibold text-gray-500 uppercase">Describe otros síntomas</label>
+                    <textarea
+                      rows={2}
+                      value={sintomaDetalles}
+                      onChange={e => {
+                        setSintomaDetalles(e.target.value)
+                        checkSintomaAlarma(e.target.value)
+                      }}
+                      placeholder="Ej: dolor de cabeza leve, náuseas, calambres..."
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-pink-100 mt-1"
+                    />
                   </div>
-                  <div className="flex justify-end gap-2 mt-1">
-                    <button type="button" onClick={() => setModalAbierto(null)} className="px-4 py-2 rounded-lg border text-sm">Cancelar</button>
-                    <button type="submit" className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium">Guardar</button>
+
+                  {sintomaAlarmaCritico && (
+                    <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl p-3 text-xs leading-relaxed font-semibold">
+                      ⚠️ ¡Alerta! El síntoma escrito coincide con un signo de alarma obstétrica. Si el dolor es severo, sangras o pierdes líquido, usa el botón rojo SOS de emergencia.
+                    </div>
+                  )}
+
+                  <div className="flex justify-end gap-2 mt-2 pt-2 border-t border-gray-100">
+                    <button
+                      type="button"
+                      onClick={() => setModalAbierto(null)}
+                      className="px-4 py-2 rounded-xl border text-sm font-semibold text-gray-500 hover:bg-gray-50"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold shadow-md"
+                    >
+                      Guardar Reporte
+                    </button>
                   </div>
                 </form>
               </div>
             </div>
           )}
 
+          {/* MODAL: Registrar Peso */}
           {modalAbierto === 'peso' && (
             <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[100] p-4">
-              <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
-                <h2 className="font-bold text-lg mb-1">Registrar peso</h2>
-                <p className="text-sm text-gray-500 mb-4">Anota tu peso de hoy para llevar el seguimiento.</p>
-                <form className="flex flex-col gap-4">
+              <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-xl border border-pink-100">
+                <h2 className="font-bold text-lg text-gray-800 mb-1">⚖️ Registrar Peso Corporal</h2>
+                <p className="text-sm text-gray-400 mb-4">Lleva el seguimiento diario de tu peso para auditar la curva de evolución.</p>
+                
+                <form onSubmit={handleGuardarPeso} className="flex flex-col gap-4">
                   <div>
-                    <label className="text-sm font-medium block mb-1">Tu peso (kg)</label>
-                    <input type="number" step="0.1" min="0" placeholder="Ej: 62.5" className="w-full border rounded-lg px-3 py-2 text-sm" />
+                    <label className="text-xs font-semibold text-gray-500 uppercase">Tu Peso (kg)</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="30"
+                      max="200"
+                      required
+                      placeholder="Ej: 64.5"
+                      value={pesoVal}
+                      onChange={e => setPesoVal(e.target.value)}
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-100 mt-1"
+                    />
                   </div>
                   <div>
-                    <label className="text-sm font-medium block mb-1">Fecha</label>
-                    <input type="date" className="w-full border rounded-lg px-3 py-2 text-sm" />
+                    <label className="text-xs font-semibold text-gray-500 uppercase">Fecha de Registro</label>
+                    <input
+                      type="date"
+                      required
+                      value={pesoFecha}
+                      onChange={e => setPesoFecha(e.target.value)}
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-100 mt-1"
+                    />
                   </div>
-                  <div className="flex justify-end gap-2 mt-1">
-                    <button type="button" onClick={() => setModalAbierto(null)} className="px-4 py-2 rounded-lg border text-sm">Cancelar</button>
-                    <button type="submit" className="px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-medium">Guardar</button>
+                  
+                  <div className="flex justify-end gap-2 mt-2 pt-2 border-t border-gray-100">
+                    <button
+                      type="button"
+                      onClick={() => setModalAbierto(null)}
+                      className="px-4 py-2 rounded-xl border text-sm font-semibold text-gray-500 hover:bg-gray-50"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-semibold shadow-md"
+                    >
+                      Guardar Peso
+                    </button>
                   </div>
                 </form>
               </div>
             </div>
           )}
 
+          {/* MODAL: Recordatorios */}
           {modalAbierto === 'recordatorio' && (
             <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[100] p-4">
-              <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
-                <h2 className="font-bold text-lg mb-1">Nuevo recordatorio</h2>
-                <p className="text-sm text-gray-500 mb-4">Te avisaremos en la fecha y hora que elijas.</p>
-                <form className="flex flex-col gap-4">
+              <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-xl border border-pink-100">
+                <h2 className="font-bold text-lg text-gray-800 mb-1">🔔 Crear Nuevo Recordatorio</h2>
+                <p className="text-sm text-gray-400 mb-4">Crea una alarma para tus vitaminas, medicamentos o actividades clínicas.</p>
+                
+                <form onSubmit={handleGuardarRecordatorio} className="flex flex-col gap-4">
                   <div>
-                    <label className="text-sm font-medium block mb-1">¿De qué quieres que te recuerde?</label>
-                    <input type="text" placeholder="Ej: Tomar mi vitamina, próxima cita..." className="w-full border rounded-lg px-3 py-2 text-sm" />
+                    <label className="text-xs font-semibold text-gray-500 uppercase">Título del Recordatorio</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ej: Tomar Ácido Fólico, control médico..."
+                      value={recTitulo}
+                      onChange={e => setRecTitulo(e.target.value)}
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-100 mt-1"
+                    />
                   </div>
+                  
                   <div className="flex gap-3">
                     <div className="flex-1">
-                      <label className="text-sm font-medium block mb-1">Fecha</label>
-                      <input type="date" className="w-full border rounded-lg px-3 py-2 text-sm" />
+                      <label className="text-xs font-semibold text-gray-500 uppercase">Fecha</label>
+                      <input
+                        type="date"
+                        required
+                        value={recFecha}
+                        onChange={e => setRecFecha(e.target.value)}
+                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-100 mt-1"
+                      />
                     </div>
                     <div className="flex-1">
-                      <label className="text-sm font-medium block mb-1">Hora</label>
-                      <input type="time" className="w-full border rounded-lg px-3 py-2 text-sm" />
+                      <label className="text-xs font-semibold text-gray-500 uppercase">Hora</label>
+                      <input
+                        type="time"
+                        required
+                        value={recHora}
+                        onChange={e => setRecHora(e.target.value)}
+                        className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-100 mt-1"
+                      />
                     </div>
                   </div>
-                  <div className="flex justify-end gap-2 mt-1">
-                    <button type="button" onClick={() => setModalAbierto(null)} className="px-4 py-2 rounded-lg border text-sm">Cancelar</button>
-                    <button type="submit" className="px-4 py-2 rounded-lg bg-amber-600 text-white text-sm font-medium">Guardar</button>
+                  
+                  <div className="flex justify-end gap-2 mt-2 pt-2 border-t border-gray-100">
+                    <button
+                      type="button"
+                      onClick={() => setModalAbierto(null)}
+                      className="px-4 py-2 rounded-xl border text-sm font-semibold text-gray-500 hover:bg-gray-50"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold shadow-md"
+                    >
+                      Guardar Alarma
+                    </button>
                   </div>
                 </form>
               </div>
@@ -147,13 +438,13 @@ export default function AccionesRapidas() {
         document.body
       )}
 
-      {/* Quick Actions */}
+      {/* Quick Actions Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { id: 'cita', icon: <img src='/calendario.png' alt='logo_calendario' className="w-7 h-7" />, label: 'Agendar cita', sub: 'Reservar nueva cita', color: 'bg-pink-50 text-pink-600 border-pink-100' },
-          { id: 'control', icon: <img src='/control.png' alt='logo_control' className="w-7 h-7" />, label: 'Registrar control', sub: 'Añadir nuevo control', color: 'bg-blue-50 text-blue-600 border-blue-100' },
-          { id: 'peso', icon: <img src='/peso.png' alt='logo_peso' className="w-7 h-7" />, label: 'Registrar peso', sub: 'Llevar seguimiento', color: 'bg-green-50 text-green-600 border-green-100' },
-          { id: 'recordatorio', icon: <img src='/notificacion.png' alt='logo_notificacion' className="w-7 h-7" />, label: 'Recordatorios', sub: 'Ver mis alertas', color: 'bg-amber-50 text-amber-600 border-amber-100' },
+          { id: 'cita', icon: <img src='/calendario.png' alt='logo_calendario' className="w-7 h-7" />, label: 'Agendar cita', sub: 'Reservar nueva cita', color: 'bg-pink-50 text-pink-600 border-pink-100 hover:border-pink-200' },
+          { id: 'control', icon: <img src='/control.png' alt='logo_control' className="w-7 h-7" />, label: 'Registrar control', sub: 'Añadir nuevo control', color: 'bg-blue-50 text-blue-600 border-blue-100 hover:border-blue-200' },
+          { id: 'peso', icon: <img src='/peso.png' alt='logo_peso' className="w-7 h-7" />, label: 'Registrar peso', sub: 'Llevar seguimiento', color: 'bg-green-50 text-green-600 border-green-100 hover:border-green-200' },
+          { id: 'recordatorio', icon: <img src='/notificacion.png' alt='logo_notificacion' className="w-7 h-7" />, label: 'Recordatorios', sub: 'Nueva alarma/vitamina', color: 'bg-amber-50 text-amber-600 border-amber-100 hover:border-amber-200' },
         ].map((a) => (
           <button
             key={a.label}

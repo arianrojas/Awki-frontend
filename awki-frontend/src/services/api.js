@@ -38,10 +38,10 @@ export async function apiFetch(path, options = {}) {
     headers,
   })
 
-  // Token expired or invalid → force logout
-  if (res.status === 401) {
+  // Token expired or invalid, or Access Denied → force logout
+  if (res.status === 401 || res.status === 403) {
     clearSessionAndRedirect()
-    throw new Error('Sesión expirada. Por favor, inicia sesión nuevamente.')
+    throw new Error('Sesión expirada o no autorizada. Por favor, inicia sesión nuevamente.')
   }
 
   const body = await res.json()

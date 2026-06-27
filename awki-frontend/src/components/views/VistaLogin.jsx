@@ -47,10 +47,24 @@ function ErrorBanner({ msg, onClose }) {
 
 // ─── After login: fetch active pregnancy and build user object ────────────────
 async function buildUserSession(token, email) {
-  // 1. Decode JWT to extract basic claims
-  const claims = decodeJwt(token)
-  const userId = claims?.sub ?? claims?.userId ?? null
-  const rol    = claims?.rol  ?? claims?.role   ?? 'PACIENTE'
+  // 1. Fetch user info from /api/v1/auth/me
+  let meData = null
+  try {
+    const meRes = await fetch(`${BASE_URL}/api/v1/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    if (meRes.ok) {
+      const body = await meRes.json()
+      meData = body?.data ?? null
+    }
+  } catch (err) {
+    console.error("Error al obtener info de usuario:", err)
+  }
+
+  const userId = meData?.id ?? null
+  const rol = meData?.rol ?? 'PACIENTE'
+  const name = meData ? `${meData.nombres} ${meData.apellidos}`.trim() : email
+  const perfilId = meData?.perfilId ?? null
 
   // 2. Try to get active pregnancy (only PACIENTE has one)
   let embarazoData = null
@@ -63,7 +77,6 @@ async function buildUserSession(token, email) {
         const body = await res.json()
         embarazoData = body?.data ?? null
       }
-      // 404 = no active pregnancy yet → still allow login
     } catch {
       // Network error on this secondary call → continue without embarazo
     }
@@ -73,8 +86,10 @@ async function buildUserSession(token, email) {
   const user = {
     userId,
     role:  rol,
-    email, // TODO: replace with real name once GET /api/v1/auth/me is implemented
-    name:  email,
+    email: meData?.email ?? email,
+    name:  name || email,
+    medicoId:                rol === 'MEDICO' ? perfilId : null,
+    pacienteId:              rol === 'PACIENTE' ? perfilId : null,
     embarazoId:              embarazoData?.id                      ?? null,
     semanasGestacion:        embarazoData?.semanasGestacionActuales ?? null,
     trimestre:               embarazoData?.trimestre                ?? null,

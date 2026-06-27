@@ -10,10 +10,37 @@ const navItems = [
   { id: 'educacion', icon: <img src="/educacion.png" alt="logo_educacion" className='w-full h-full object-cover'></img>, label: 'Educación' },
   { id: 'recordatorios', icon: <img src="/notificacion.png" alt="logo_notificacion" className='w-full h-full object-cover'></img>, label: 'Recordatorios' },
   { id: 'mensajes', icon: <img src="/mensaje.png" alt="logo_mensaje" className='w-full h-full object-cover'></img>, label: 'Mensajes' },
+<<<<<<< HEAD:awki-frontend/src/components/BarraLateral.jsx
   { id: 'doctor', icon: <img src="/doctor_barralateral.png" alt="logo_doctorr" className='w-full h-full object-cover'></img>, label: 'Panel Médico' },
+=======
+  { id: 'doctor', icon: <span className="text-lg leading-none">👨‍⚕️</span>, label: 'Panel Médico (Demo)' },
+  { id: 'admin_clinica', icon: <span className="text-lg leading-none">🏥</span>, label: 'Gestión Clínica (Admin)' },
+>>>>>>> 87025f8dcacebe24b06c8ef0f2ecb037881ddc2b:src/components/BarraLateral.jsx
 ]
 
-export default function BarraLateral({ activeTab, setActiveTab }) {
+export default function BarraLateral({ activeTab, setActiveTab, currentUser }) {
+  const isDoctor = currentUser?.role === 'MEDICO' || currentUser?.role === 'ADMIN_CLINICA'
+
+  const items = navItems.filter(item => {
+    if (isDoctor) {
+      return item.id === 'doctor' || item.id === 'admin_clinica'
+    } else {
+      return item.id !== 'doctor' && item.id !== 'admin_clinica'
+    }
+  })
+
+  const name = currentUser?.name ?? 'Usuario'
+  const email = currentUser?.email ?? ''
+  const roleText = currentUser?.role === 'MEDICO' ? 'Médico' : currentUser?.role === 'ADMIN_CLINICA' ? 'Admin Clínica' : 'Paciente'
+
+  const initials = name
+    .split('@')[0] // por si usan correo como name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .substring(0, 2)
+    .toUpperCase()
+
   return (
     <aside className="fixed top-0 left-0 h-screen w-[220px] bg-white border-r border-pink-100 flex flex-col z-30 shadow-sm">
       {/* Logo */}
@@ -33,7 +60,7 @@ export default function BarraLateral({ activeTab, setActiveTab }) {
 
       {/* Navigation */}
       <nav className="flex-1 py-4 overflow-y-auto">
-        {navItems.map((item) => (
+        {items.map((item) => (
           <button
             key={item.id}
             onClick={() => setActiveTab(item.id)}
@@ -59,11 +86,11 @@ export default function BarraLateral({ activeTab, setActiveTab }) {
         className={`border-t border-pink-50 px-4 py-4 flex items-center gap-3 cursor-pointer transition-colors ${activeTab === 'perfil' ? 'bg-pink-50' : 'hover:bg-gray-50'}`}
       >
         <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-300 to-purple-400 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-          MF
+          {initials || 'U'}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-gray-800 font-semibold text-[13px] truncate">María Fernanda</p>
-          <p className="text-gray-400 text-[11px]">24 años</p>
+          <p className="text-gray-800 font-semibold text-[13px] truncate">{name}</p>
+          <p className="text-gray-400 text-[11px] truncate">{roleText}</p>
         </div>
         <button className={`text-xs transition-colors ${activeTab === 'perfil' ? 'text-pink-600' : 'text-gray-400 hover:text-pink-500'}`}>
           ›
