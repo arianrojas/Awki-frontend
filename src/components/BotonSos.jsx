@@ -21,9 +21,14 @@ export default function BotonSos({ currentUser }) {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           pos => setGps({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
-          err => console.warn("No se pudo obtener ubicación GPS:", err),
+          err => {
+            console.warn("No se pudo obtener ubicación GPS real. Asignando coordenadas simuladas de prueba.");
+            setGps({ lat: -12.046374, lon: -77.042793 });
+          },
           { timeout: 5000 }
         )
+      } else {
+        setGps({ lat: -12.046374, lon: -77.042793 });
       }
     }
   }, [currentUser])
