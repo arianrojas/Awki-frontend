@@ -6,6 +6,7 @@ import VistaPendiente from './components/views/VistaPendiente'
 import FormularioPaciente from './components/views/FormularioPaciente'
 import DoctorDashboard from './components/views/DoctorDashboard'
 import VistaLogin from './components/views/VistaLogin'
+import VistaChat from './components/views/VistaChat'
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('inicio')
@@ -42,9 +43,10 @@ export default function App() {
   }
 
   const renderView = () => {
-    if (activeTab === 'inicio') return <VistaInicio />
-    if (activeTab === 'perfil') return <FormularioPaciente />
-    if (activeTab === 'doctor') return <DoctorDashboard />
+    if (activeTab === 'inicio')    return <VistaInicio />
+    if (activeTab === 'mensajes')  return <VistaChat />
+    if (activeTab === 'perfil')    return <FormularioPaciente />
+    if (activeTab === 'doctor')    return <DoctorDashboard />
     return <VistaPendiente tab={activeTab} />
   }
 

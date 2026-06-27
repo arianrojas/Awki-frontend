@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
+import { decodeJwt } from '../../services/api'
 
-const API_BASE = 'http://localhost:8080'
+const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function TabBtn({ label, active, onClick }) {
@@ -39,17 +40,59 @@ function ErrorBanner({ msg, onClose }) {
     <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-xl px-4 py-2.5">
       <span className="text-red-500">⚠</span>
       <p className="text-red-600 text-sm flex-1">{msg}</p>
-      <button onClick={onClose} className="text-red-400 hover:text-red-600 ml-auto">✕</button>
+      <button onClick={onClose} className="text-red-400 hover:text-red-600 ml-auto text-xs">✕</button>
     </div>
   )
 }
 
+// ─── After login: fetch active pregnancy and build user object ────────────────
+async function buildUserSession(token, email) {
+  // 1. Decode JWT to extract basic claims
+  const claims = decodeJwt(token)
+  const userId = claims?.sub ?? claims?.userId ?? null
+  const rol    = claims?.rol  ?? claims?.role   ?? 'PACIENTE'
+
+  // 2. Try to get active pregnancy (only PACIENTE has one)
+  let embarazoData = null
+  if (rol === 'PACIENTE') {
+    try {
+      const res = await fetch(`${BASE_URL}/api/v1/embarazos/activo`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (res.ok) {
+        const body = await res.json()
+        embarazoData = body?.data ?? null
+      }
+      // 404 = no active pregnancy yet → still allow login
+    } catch {
+      // Network error on this secondary call → continue without embarazo
+    }
+  }
+
+  // 3. Build and save user object
+  const user = {
+    userId,
+    role:  rol,
+    email, // TODO: replace with real name once GET /api/v1/auth/me is implemented
+    name:  email,
+    embarazoId:              embarazoData?.id                      ?? null,
+    semanasGestacion:        embarazoData?.semanasGestacionActuales ?? null,
+    trimestre:               embarazoData?.trimestre                ?? null,
+    fechaProbableParto:      embarazoData?.fechaProbableParto       ?? null,
+  }
+
+  localStorage.setItem('awki_token', token)
+  localStorage.setItem('awki_user',  JSON.stringify(user))
+
+  return user
+}
+
 // ─── Login Form ───────────────────────────────────────────────────────────────
 function FormLogin({ onSuccess }) {
-  const [email, setEmail] = useState('')
+  const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const [loading, setLoading]   = useState(false)
+  const [error, setError]       = useState(null)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -58,29 +101,26 @@ function FormLogin({ onSuccess }) {
     setError(null)
 
     try {
-      const res = await fetch(`${API_BASE}/api/v1/auth/login`, {
-        method: 'POST',
+      // POST /api/v1/auth/login → ApiResponse<AuthResponse{ token }>
+      const res  = await fetch(`${BASE_URL}/api/v1/auth/login`, {
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body:    JSON.stringify({ email, password }),
       })
       const body = await res.json()
 
-      if (res.ok && body.success) {
-        const d = body.data
-        localStorage.setItem('awki_token', d.token)
-        localStorage.setItem('awki_user', JSON.stringify({
-          userId:    d.usuario_id,
-          role:      d.rol,
-          name:      d.nombre_completo,
-          clinicaId: d.clinica_id,
-          embarazoId: d.embarazo_id ?? null,
-        }))
-        onSuccess()
-      } else {
-        setError(body.error?.message ?? 'Credenciales inválidas. Revisa tu correo y contraseña.')
+      if (!res.ok) {
+        throw new Error(body?.error?.message ?? 'Credenciales inválidas. Revisa tu correo y contraseña.')
       }
-    } catch {
-      setError('No se pudo conectar con el servidor. ¿Está el backend encendido?')
+
+      // Unwrap ApiResponse envelope
+      const token = body?.data?.token
+      if (!token) throw new Error('El servidor no devolvió un token válido.')
+
+      await buildUserSession(token, email)
+      onSuccess()
+    } catch (err) {
+      setError(err.message ?? 'Error al iniciar sesión.')
     } finally {
       setLoading(false)
     }
@@ -99,7 +139,7 @@ function FormLogin({ onSuccess }) {
         className="w-full py-3.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 disabled:from-gray-200 disabled:to-gray-300 disabled:cursor-not-allowed text-white font-bold text-sm transition-all duration-200 shadow-md hover:shadow-pink-200 flex items-center justify-center gap-2 mt-1"
       >
         {loading
-          ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Iniciando sesión...</>
+          ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />Iniciando sesión...</>
           : 'Iniciar sesión →'}
       </button>
     </form>
@@ -110,11 +150,12 @@ function FormLogin({ onSuccess }) {
 function FormRegistro({ onRegistroExitoso }) {
   const [form, setForm] = useState({
     nombres: '', apellidos: '', email: '', password: '',
-    telefono: '', fechaNacimiento: '', consentimientoIa: true,
+    telefono: '', fechaNacimiento: '', dni: '', departamento: '',
+    consentimientoIa: true,
   })
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [exito, setExito] = useState(false)
+  const [error,   setError]   = useState(null)
+  const [exito,   setExito]   = useState(false)
 
   const set = (key) => (val) => setForm(f => ({ ...f, [key]: val }))
 
@@ -124,20 +165,18 @@ function FormRegistro({ onRegistroExitoso }) {
     setError(null)
 
     try {
-      const res = await fetch(`${API_BASE}/api/v1/auth/register/paciente`, {
-        method: 'POST',
+      const res  = await fetch(`${BASE_URL}/api/v1/auth/register/paciente`, {
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body:    JSON.stringify(form),
       })
       const body = await res.json()
 
-      if (res.ok && body.success) {
-        setExito(true)
-      } else {
-        setError(body.error?.message ?? 'Error al registrar. Verifica los datos e intenta de nuevo.')
-      }
-    } catch {
-      setError('No se pudo conectar con el servidor.')
+      if (!res.ok) throw new Error(body?.error?.message ?? 'Error al registrar. Verifica los datos.')
+
+      setExito(true)
+    } catch (err) {
+      setError(err.message ?? 'No se pudo conectar con el servidor.')
     } finally {
       setLoading(false)
     }
@@ -146,18 +185,16 @@ function FormRegistro({ onRegistroExitoso }) {
   if (exito) {
     return (
       <div className="flex flex-col items-center gap-4 py-6 text-center">
-        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center text-4xl shadow-inner">
-          ✅
-        </div>
+        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center text-4xl shadow-inner">✅</div>
         <div>
           <p className="font-bold text-gray-800 text-lg mb-1">¡Cuenta creada!</p>
           <p className="text-gray-500 text-sm leading-relaxed max-w-xs">
-            Tu cuenta fue registrada exitosamente. Ya puedes iniciar sesión con tu correo y contraseña.
+            Ya puedes iniciar sesión con tu correo y contraseña.
           </p>
         </div>
         <button
           onClick={onRegistroExitoso}
-          className="px-8 py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold text-sm hover:from-pink-600 hover:to-purple-700 transition-all shadow-md hover:shadow-pink-200"
+          className="px-8 py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold text-sm hover:from-pink-600 hover:to-purple-700 transition-all shadow-md"
         >
           Iniciar sesión →
         </button>
@@ -168,14 +205,18 @@ function FormRegistro({ onRegistroExitoso }) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <div className="grid grid-cols-2 gap-3">
-        <Campo label="Nombres" value={form.nombres} onChange={set('nombres')} placeholder="Ana" disabled={loading} />
+        <Campo label="Nombres"   value={form.nombres}   onChange={set('nombres')}   placeholder="Ana"    disabled={loading} />
         <Campo label="Apellidos" value={form.apellidos} onChange={set('apellidos')} placeholder="García" disabled={loading} />
       </div>
-      <Campo label="Correo electrónico" type="email" value={form.email} onChange={set('email')} placeholder="ana@correo.com" disabled={loading} />
-      <Campo label="Contraseña" type="password" value={form.password} onChange={set('password')} placeholder="Mínimo 6 caracteres" disabled={loading} />
+      <Campo label="Correo electrónico" type="email"    value={form.email}    onChange={set('email')}    placeholder="ana@correo.com"    disabled={loading} />
+      <Campo label="Contraseña"         type="password" value={form.password} onChange={set('password')} placeholder="Mínimo 6 caracteres" disabled={loading} />
       <div className="grid grid-cols-2 gap-3">
-        <Campo label="Teléfono" value={form.telefono} onChange={set('telefono')} placeholder="+51 999 999 999" disabled={loading} />
+        <Campo label="Teléfono"           value={form.telefono}        onChange={set('telefono')}        placeholder="+51 999 999 999" disabled={loading} />
         <Campo label="Fecha de nacimiento" type="date" value={form.fechaNacimiento} onChange={set('fechaNacimiento')} disabled={loading} />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Campo label="DNI (opcional)"        value={form.dni}         onChange={set('dni')}         placeholder="12345678"  disabled={loading} />
+        <Campo label="Departamento (opcional)" value={form.departamento} onChange={set('departamento')} placeholder="Lima"  disabled={loading} />
       </div>
 
       {/* Consentimiento IA */}
@@ -197,11 +238,11 @@ function FormRegistro({ onRegistroExitoso }) {
 
       <button
         type="submit"
-        disabled={loading || !form.email || !form.password || !form.nombres || !form.apellidos}
+        disabled={loading || !form.email || !form.password || !form.nombres || !form.apellidos || !form.consentimientoIa}
         className="w-full py-3.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 disabled:from-gray-200 disabled:to-gray-300 disabled:cursor-not-allowed text-white font-bold text-sm transition-all shadow-md hover:shadow-pink-200 flex items-center justify-center gap-2 mt-1"
       >
         {loading
-          ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> Creando cuenta...</>
+          ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />Creando cuenta...</>
           : 'Crear cuenta →'}
       </button>
     </form>
@@ -216,7 +257,7 @@ export default function VistaLogin({ onLoginSuccess }) {
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
 
-        {/* Logo / Branding */}
+        {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex w-20 h-20 rounded-3xl bg-gradient-to-br from-pink-400 to-purple-600 items-center justify-center shadow-xl shadow-pink-200/50 mb-4">
             <span className="text-4xl">🤰</span>
@@ -227,11 +268,9 @@ export default function VistaLogin({ onLoginSuccess }) {
 
         {/* Card */}
         <div className="bg-white rounded-3xl shadow-xl shadow-purple-100/50 border border-gray-100/80 p-6">
-
-          {/* Tabs */}
           <div className="flex bg-gray-100 rounded-xl p-1 mb-6">
-            <TabBtn label="Iniciar sesión" active={tab === 'login'} onClick={() => setTab('login')} />
-            <TabBtn label="Crear cuenta" active={tab === 'registro'} onClick={() => setTab('registro')} />
+            <TabBtn label="Iniciar sesión" active={tab === 'login'}    onClick={() => setTab('login')} />
+            <TabBtn label="Crear cuenta"   active={tab === 'registro'} onClick={() => setTab('registro')} />
           </div>
 
           {tab === 'login'
@@ -240,7 +279,6 @@ export default function VistaLogin({ onLoginSuccess }) {
           }
         </div>
 
-        {/* Footer note */}
         <p className="text-center text-gray-400 text-[11px] mt-5 leading-relaxed">
           Al usar Awki, aceptas nuestros términos de servicio.<br />
           Tu información clínica está protegida y encriptada.
