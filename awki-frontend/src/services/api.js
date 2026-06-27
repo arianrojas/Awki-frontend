@@ -74,6 +74,9 @@ export const api = {
 
   patch: (path, body) =>
     apiFetch(path, { method: 'PATCH', body: JSON.stringify(body) }),
+
+  delete: (path) =>
+    apiFetch(path, { method: 'DELETE' }),
 }
 
 // ─── JWT decoder (no validation, only payload extraction) ────────────────────
